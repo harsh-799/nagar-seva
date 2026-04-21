@@ -16,7 +16,7 @@ public class Ward {
     @Id
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String wardName;
 
     @OneToOne
