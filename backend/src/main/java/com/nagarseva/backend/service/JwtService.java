@@ -1,5 +1,6 @@
 package com.nagarseva.backend.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,5 +28,29 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .claim("role",role)
                 .compact();
+    }
+
+    public Claims getClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public String getUsername(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public Date getExpirationTime(String token) {
+        return getClaims(token).getExpiration();
+    }
+
+    public boolean isTokenExpired(String token) {
+        return getExpirationTime(token).before(new Date());
+    }
+
+    public boolean validateToken(String token, String username) {
+        return getUsername(token).equals(username) && !isTokenExpired(token);
     }
 }
