@@ -14,4 +14,5 @@ import lombok.Setter;
 public class LoginUserResponse {
     private Boolean success;
     private String message;
+    private String token;
 }
