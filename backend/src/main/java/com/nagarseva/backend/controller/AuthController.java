@@ -23,4 +23,9 @@ public class AuthController {
         return authService.createNewCitizenAccount(registerCitizenRequest);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginUserResponse> loginUser(@Valid @RequestBody LoginUserRequest loginUserRequest) {
+        return authService.authenticateUser(loginUserRequest);
+    }
+
 }

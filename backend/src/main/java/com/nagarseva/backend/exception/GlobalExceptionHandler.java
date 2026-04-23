@@ -40,4 +40,14 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<LoginUserResponse> handleBadCredentials(BadCredentialsException ex) {
+        LoginUserResponse response = new LoginUserResponse();
+        System.out.println(ex.getMessage());
+        response.setSuccess(false);
+        response.setMessage("Invalid Credentials!");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 }
