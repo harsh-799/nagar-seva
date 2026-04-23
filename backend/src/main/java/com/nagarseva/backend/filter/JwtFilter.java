@@ -2,6 +2,9 @@ package com.nagarseva.backend.filter;
 
 import com.nagarseva.backend.service.CustomUserDetailsService;
 import com.nagarseva.backend.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +36,18 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (token != null) {
-            username = jwtService.getUsername(token);
+            try {
+                username = jwtService.getUsername(token);
+            } catch (ExpiredJwtException e) {
+                sendError(response, "Token Expired");
+                return;
+            } catch (SignatureException e) {
+                sendError(response, "Signature Verification Failed");
+                return;
+            } catch (Exception e) {
+                sendError(response,"Invalid token");
+                return;
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -51,5 +65,19 @@ public class JwtFilter extends OncePerRequestFilter {
          }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendError(HttpServletResponse response, String message) throws IOException {
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        String body = """
+        {
+            "success": false,
+            "message": "%s"
+        }
+        """.formatted(message);
+
+        response.getWriter().write(body);
     }
 }
