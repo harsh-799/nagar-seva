@@ -2,6 +2,8 @@ package com.nagarseva.backend.exception;
 
 import com.nagarseva.backend.dto.ErrorResponse;
 import com.nagarseva.backend.dto.LoginUserResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,5 +23,15 @@ public class GlobalExceptionHandler {
         );
 
         return new ErrorResponse(false, "Validation Failed",errors);
+    }
+
+    @ExceptionHandler(UsernameAlreadyTaken.class)
+    public ResponseEntity<LoginUserResponse> handleUsernameAlreadyTaken(UsernameAlreadyTaken ex) {
+        LoginUserResponse response = new LoginUserResponse();
+        System.out.println(ex.getMessage());
+        response.setSuccess(false);
+        response.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }
