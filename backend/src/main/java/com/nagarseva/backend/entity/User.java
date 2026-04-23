@@ -32,6 +32,7 @@ public class User {
     private Role role;
 
     private boolean active;
+    private boolean isDefaultPassword;
 
     private String department;
 

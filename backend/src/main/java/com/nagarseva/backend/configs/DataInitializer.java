@@ -32,6 +32,7 @@ public class DataInitializer {
                 user.setPassword(passwordEncoder.encode(adminPassword));
                 user.setRole(Role.ADMIN);
                 user.setActive(true);
+                user.setDefaultPassword(true);
                 user.setFullName("Default Admin");
 
                 userRepository.save(user);
