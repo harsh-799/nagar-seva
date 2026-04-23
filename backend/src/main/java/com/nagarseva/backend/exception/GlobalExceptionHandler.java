@@ -15,14 +15,20 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ErrorResponse handleLoginValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleLogin_RegisterValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(err ->
                 errors.put(err.getField(), err.getDefaultMessage())
         );
 
-        return new ErrorResponse(false, "Validation Failed",errors);
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Validation failed");
+        resp.setErrors(errors);
+
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
     @ExceptionHandler(UsernameAlreadyTaken.class)
