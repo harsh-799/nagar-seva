@@ -1,16 +1,21 @@
 package com.nagarseva.backend.service;
 
-import com.nagarseva.backend.dto.PasswordUpdationRequest;
-import com.nagarseva.backend.dto.PasswordUpdationResponse;
+import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
+import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.InvalidPasswordException;
+import com.nagarseva.backend.exception.InvalidUserCreation;
+import com.nagarseva.backend.exception.UsernameAlreadyTaken;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.EnumSet;
 
 @Service
 @AllArgsConstructor
@@ -50,4 +55,31 @@ public class UserService {
         return response;
     }
 
+    public RegisterUserResponse addNewUser(RegisterUserRequest registerUserRequest) {
+        if (userRepository.existsByUsername(registerUserRequest.getUsername())) {
+            throw new UsernameAlreadyTaken("Username Already Taken.");
+        }
+
+        if (registerUserRequest.getRole().equals(Role.CITIZEN)) {
+            throw new InvalidUserCreation("Action not allowed: Admins are not permitted to create Citizen accounts");
+        }
+
+        User user = new User();
+        user.setUsername(registerUserRequest.getUsername());
+        user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
+        user.setFullName(registerUserRequest.getFullName());
+        user.setRole(registerUserRequest.getRole());
+        user.setDefaultPassword(true);
+        user.setActive(true);
+
+        userRepository.save(user);
+
+        RegisterUserResponse response = new RegisterUserResponse();
+        response.setSuccess(true);
+        response.setUsername(registerUserRequest.getUsername());
+        response.setMessage("Account Created Successfully.");
+        response.setRole(registerUserRequest.getRole());
+
+        return response;
+    }
 }

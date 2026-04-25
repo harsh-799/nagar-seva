@@ -4,6 +4,7 @@ import com.nagarseva.backend.dto.ErrorResponse;
 import com.nagarseva.backend.dto.LoginUserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,7 +36,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<LoginUserResponse> handleUsernameAlreadyTaken(UsernameAlreadyTaken ex) {
         LoginUserResponse response = new LoginUserResponse();
         response.setSuccess(false);
-
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
@@ -56,4 +56,34 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
+
+    @ExceptionHandler(InvalidUserCreation.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUserCreation(InvalidUserCreation ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Account Creation Failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Role",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleEmptyRoleSelection(HttpMessageNotReadableException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Validation failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("role","Role is empty or invalid");
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+
 }
