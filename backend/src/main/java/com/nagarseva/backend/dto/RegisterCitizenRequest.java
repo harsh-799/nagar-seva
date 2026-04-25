@@ -1,6 +1,7 @@
 package com.nagarseva.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,4 +18,6 @@ public class RegisterCitizenRequest {
     private String password;
     @NotBlank(message = "Name is empty")
     private String fullName;
+    @NotNull(message = "wardId is empty")
+    private Integer wardId;
 }

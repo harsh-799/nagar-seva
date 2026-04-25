@@ -135,5 +135,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
     }
 
+    @ExceptionHandler(InvalidWard.class)
+    public ResponseEntity<ErrorResponse> handleInvalidWard(InvalidWard ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Account Creation Failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("wardId",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
+    }
+
+
+
 
 }

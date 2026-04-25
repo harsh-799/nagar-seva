@@ -5,9 +5,12 @@ import com.nagarseva.backend.dto.LoginUserResponse;
 import com.nagarseva.backend.dto.RegisterCitizenRequest;
 import com.nagarseva.backend.dto.RegisterCitizenResponse;
 import com.nagarseva.backend.entity.User;
+import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
+import com.nagarseva.backend.exception.InvalidWard;
 import com.nagarseva.backend.exception.UsernameAlreadyTaken;
 import com.nagarseva.backend.repository.UserRepository;
+import com.nagarseva.backend.repository.WardRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +26,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
+    private WardRepository wardRepository;
 
     public RegisterCitizenResponse createNewCitizenAccount(RegisterCitizenRequest registerCitizenRequest) {
 
@@ -30,11 +34,16 @@ public class AuthService {
             throw new UsernameAlreadyTaken("Username Already Taken.");
         }
 
+        Ward ward = wardRepository.findById(registerCitizenRequest.getWardId()).orElseThrow(
+                () -> new InvalidWard("Invalid wardId: ward does not exist.")
+        );
+
         User citizen = new User();
         citizen.setUsername(registerCitizenRequest.getUsername());
         citizen.setPassword(passwordEncoder.encode(registerCitizenRequest.getPassword()));
         citizen.setFullName(registerCitizenRequest.getFullName());
         citizen.setRole(Role.CITIZEN);
+        citizen.setCitizensWard(ward);
         citizen.setActive(true);
 
         User savedCitizen = userRepository.save(citizen);
