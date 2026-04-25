@@ -34,9 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UsernameAlreadyTaken.class)
     public ResponseEntity<LoginUserResponse> handleUsernameAlreadyTaken(UsernameAlreadyTaken ex) {
         LoginUserResponse response = new LoginUserResponse();
-        System.out.println(ex.getMessage());
         response.setSuccess(false);
-        response.setMessage(ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
@@ -44,10 +42,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<LoginUserResponse> handleBadCredentials(BadCredentialsException ex) {
         LoginUserResponse response = new LoginUserResponse();
-        System.out.println(ex.getMessage());
         response.setSuccess(false);
         response.setMessage("Invalid Credentials!");
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordUpdation(InvalidPasswordException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 }

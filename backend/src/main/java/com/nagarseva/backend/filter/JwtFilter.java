@@ -1,9 +1,9 @@
 package com.nagarseva.backend.filter;
 
+import com.nagarseva.backend.security.CustomUserDetails;
 import com.nagarseva.backend.service.CustomUserDetailsService;
 import com.nagarseva.backend.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -59,6 +59,17 @@ public class JwtFilter extends OncePerRequestFilter {
                         null,
                         userdetails.getAuthorities()
                 );
+
+                CustomUserDetails customUser = (CustomUserDetails) userdetails;
+
+                String path = request.getRequestURI();
+
+                if (customUser.isDefaultPassword()) {
+                    if (!path.equals("/change-password")) {
+                        sendError(response, "Kindly Update your password.");
+                        return;
+                    }
+                }
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
