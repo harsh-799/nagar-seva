@@ -2,6 +2,7 @@ package com.nagarseva.backend.service;
 
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.repository.UserRepository;
+import com.nagarseva.backend.security.CustomUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,11 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 () -> new RuntimeException("User Not Found")
         );
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(userRecords.getUsername())
-                .password(userRecords.getPassword())
-                .roles(String.valueOf(userRecords.getRole()))
-                .build();
+        return new CustomUserDetails(userRecords);
 
     }
 }
