@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
+
 @Configuration
 public class DataInitializer {
 
@@ -23,7 +25,7 @@ public class DataInitializer {
 
         return args -> {
 
-            boolean adminExists = userRepository.findByRole(Role.ADMIN).isPresent();
+            boolean adminExists = userRepository.existsByRole(Role.ADMIN);
 
             if (!adminExists) {
                 System.out.println("Admin Not Found. Creating Admin..");
