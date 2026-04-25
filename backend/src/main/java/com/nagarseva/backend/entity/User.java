@@ -42,4 +42,8 @@ public class User {
     @OneToMany(mappedBy = "assignedTo")
     private List<Complaint> assignedComplaints;
 
+    @ManyToOne
+    @JoinColumn(name = "ward_id")
+    private Ward citizensWard;
+
 }

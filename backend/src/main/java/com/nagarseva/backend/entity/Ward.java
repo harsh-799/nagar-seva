@@ -25,4 +25,7 @@ public class Ward {
 
     @OneToMany(mappedBy = "ward")
     private List<Complaint> complaints;
+
+    @OneToMany(mappedBy = "citizensWard")
+    private List<User> citizens;
 }
