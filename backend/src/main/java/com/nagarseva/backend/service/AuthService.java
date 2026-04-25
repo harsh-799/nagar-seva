@@ -37,11 +37,11 @@ public class AuthService {
         citizen.setRole(Role.CITIZEN);
         citizen.setActive(true);
 
-        userRepository.save(citizen);
+        User savedCitizen = userRepository.save(citizen);
 
         RegisterCitizenResponse response = new RegisterCitizenResponse();
         response.setSuccess(true);
-        response.setUsername(registerCitizenRequest.getUsername());
+        response.setUsername(savedCitizen.getUsername());
         response.setMessage("Citizen Account Created Successfully.");
 
         return response;

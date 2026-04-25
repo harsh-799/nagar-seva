@@ -72,11 +72,11 @@ public class UserService {
         user.setDefaultPassword(true);
         user.setActive(true);
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         RegisterUserResponse response = new RegisterUserResponse();
         response.setSuccess(true);
-        response.setUsername(registerUserRequest.getUsername());
+        response.setUsername(savedUser.getUsername());
         response.setMessage("Account Created Successfully.");
         response.setRole(registerUserRequest.getRole());
 
