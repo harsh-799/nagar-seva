@@ -9,8 +9,6 @@ import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.UsernameAlreadyTaken;
 import com.nagarseva.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,7 +24,7 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
 
-    public ResponseEntity<RegisterCitizenResponse> createNewCitizenAccount(RegisterCitizenRequest registerCitizenRequest) {
+    public RegisterCitizenResponse createNewCitizenAccount(RegisterCitizenRequest registerCitizenRequest) {
 
         if (userRepository.existsByUsername(registerCitizenRequest.getUsername())) {
             throw new UsernameAlreadyTaken("Username Already Taken.");
@@ -46,10 +44,10 @@ public class AuthService {
         response.setUsername(registerCitizenRequest.getUsername());
         response.setMessage("Citizen Account Created Successfully.");
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return response;
     }
 
-    public ResponseEntity<LoginUserResponse> authenticateUser(LoginUserRequest loginUserRequest) {
+    public LoginUserResponse authenticateUser(LoginUserRequest loginUserRequest) {
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 loginUserRequest.getUsername(),
@@ -69,7 +67,8 @@ public class AuthService {
         response.setMessage("Logged In Successfully");
         response.setToken(jwtService.generateToken(authResult.getName(), authenticatedRole));
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return response;
+
     }
 
 }

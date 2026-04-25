@@ -7,8 +7,6 @@ import com.nagarseva.backend.exception.InvalidPasswordException;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +19,7 @@ public class UserService {
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<PasswordUpdationResponse> updateUserPassword(PasswordUpdationRequest passwordUpdationRequest) {
+    public PasswordUpdationResponse updateUserPassword(PasswordUpdationRequest passwordUpdationRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
@@ -45,11 +43,11 @@ public class UserService {
 
         userRepository.save(updatedUser);
 
-        PasswordUpdationResponse resp = new PasswordUpdationResponse();
-        resp.setSuccess(true);
-        resp.setMessage("Password Updated Successfully");
+        PasswordUpdationResponse response = new PasswordUpdationResponse();
+        response.setSuccess(true);
+        response.setMessage("Password Updated Successfully");
 
-        return ResponseEntity.status(HttpStatus.OK).body(resp);
+        return response;
     }
 
 }
