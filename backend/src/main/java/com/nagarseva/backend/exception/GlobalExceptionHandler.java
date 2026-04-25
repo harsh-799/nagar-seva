@@ -94,5 +94,46 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Ward Creation Failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("councillorId",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp);
+    }
+
+    @ExceptionHandler(WardCouncillorRoleMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleWardCouncillorRoleMismatch(WardCouncillorRoleMismatchException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Ward Creation Failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("councillorId",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+    @ExceptionHandler(WardAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleWardCouncillorRoleMismatch(WardAlreadyExistsException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Ward Creation Failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("wardName",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
+    }
+
 
 }
