@@ -33,19 +33,28 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UsernameAlreadyTaken.class)
-    public ResponseEntity<LoginUserResponse> handleUsernameAlreadyTaken(UsernameAlreadyTaken ex) {
-        LoginUserResponse response = new LoginUserResponse();
-        response.setSuccess(false);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyTaken(UsernameAlreadyTaken ex) {
+
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Account cannot be created");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("username",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<LoginUserResponse> handleBadCredentials(BadCredentialsException ex) {
-        LoginUserResponse response = new LoginUserResponse();
-        response.setSuccess(false);
-        response.setMessage("Invalid Credentials!");
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Invalid Credentials");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(resp);
     }
 
     @ExceptionHandler(InvalidPasswordException.class)
