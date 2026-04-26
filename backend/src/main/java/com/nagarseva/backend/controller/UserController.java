@@ -2,6 +2,8 @@ package com.nagarseva.backend.controller;
 
 import com.nagarseva.backend.dto.PasswordUpdationRequest;
 import com.nagarseva.backend.dto.PasswordUpdationResponse;
+import com.nagarseva.backend.dto.RegisterUserRequest;
+import com.nagarseva.backend.dto.RegisterUserResponse;
 import com.nagarseva.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -16,6 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private UserService userService;
+
+    @PostMapping("/admin/user")
+    public ResponseEntity<RegisterUserResponse> createNewUser(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
+        RegisterUserResponse resp = userService.addNewUser(registerUserRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
+    }
 
     @PostMapping("/change-password")
     public ResponseEntity<PasswordUpdationResponse> updatePassword(@Valid @RequestBody PasswordUpdationRequest passwordUpdationRequest) {
