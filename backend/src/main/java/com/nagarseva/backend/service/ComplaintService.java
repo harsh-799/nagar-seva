@@ -32,7 +32,7 @@ public class ComplaintService {
     private WardRepository wardRepository;
     private Cloudinary cloudinary;
 
-    public RegisterComplaintResponse addNewComplaint(RegisterComplaintRequest registerComplaintRequest) throws IOException {
+    public RegisterComplaintResponse addNewComplaint(RegisterComplaintRequest registerComplaintRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Role userRole = user.getUser().getRole();
         Ward ward = user.getUser().getCitizensWard();
