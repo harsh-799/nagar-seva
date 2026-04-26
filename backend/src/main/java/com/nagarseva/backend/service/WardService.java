@@ -5,6 +5,7 @@ import com.nagarseva.backend.dto.RegisterWardResponse;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
+import com.nagarseva.backend.exception.CouncillorAlreadyAssignedException;
 import com.nagarseva.backend.exception.UserNotFoundException;
 import com.nagarseva.backend.exception.WardAlreadyExistsException;
 import com.nagarseva.backend.exception.WardCouncillorRoleMismatchException;
@@ -31,6 +32,9 @@ public class WardService {
 
         if (wardRepository.existsByWardName(registerWardRequest.getWardName()))
             throw new WardAlreadyExistsException("Ward already exists with this name");
+
+        if (wardRepository.existsByCouncillor_Id(registerWardRequest.getCouncillorId()))
+            throw new CouncillorAlreadyAssignedException("Councillor is already assigned to another ward.");
 
         Ward ward = new Ward();
         ward.setId(registerWardRequest.getWardId());

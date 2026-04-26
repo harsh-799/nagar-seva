@@ -149,6 +149,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
     }
 
+    @ExceptionHandler(CouncillorAlreadyAssignedException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidWard(CouncillorAlreadyAssignedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Ward creation failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("councillorId",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
+    }
+
+
+
 
 
 

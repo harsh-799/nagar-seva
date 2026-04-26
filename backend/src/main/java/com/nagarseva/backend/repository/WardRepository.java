@@ -9,4 +9,6 @@ public interface WardRepository extends JpaRepository<Ward, Integer> {
     Optional<Ward> findByWardName(String wardName);
 
     boolean existsByWardName(String wardName);
+
+    boolean existsByCouncillor_Id(Integer id);
 }
