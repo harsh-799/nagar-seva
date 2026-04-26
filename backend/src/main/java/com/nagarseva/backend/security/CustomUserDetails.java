@@ -56,4 +56,9 @@ public class CustomUserDetails implements UserDetails {
     public boolean isDefaultPassword() {
         return user.isDefaultPassword();
     }
+
+    public User getUser() {
+        return user;
+    }
+
 }
