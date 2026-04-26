@@ -1,12 +1,9 @@
 package com.nagarseva.backend.service;
 
-import com.nagarseva.backend.configs.SecurityConfig;
 import com.nagarseva.backend.dto.RegisterComplaintRequest;
 import com.nagarseva.backend.dto.RegisterComplaintResponse;
-import com.nagarseva.backend.dto.RegisterUserResponse;
 import com.nagarseva.backend.entity.Complaint;
 import com.nagarseva.backend.entity.Ward;
-import com.nagarseva.backend.enums.IssueType;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.exception.*;
@@ -38,7 +35,7 @@ public class ComplaintService {
         List<MultipartFile> files = registerComplaintRequest.getImages();
 
         if (!userRole.equals(Role.CITIZEN))
-            throw new InvalidRole("Only Citizens are allowed to raise Issues");
+            throw new InvalidUserRoleException("Only Citizens are allowed to raise Issues");
 
         if (registerComplaintRequest.getWardId() != null) {
             ward = wardRepository.findById(registerComplaintRequest.getWardId()).orElseThrow(
