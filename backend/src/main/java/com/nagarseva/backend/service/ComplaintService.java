@@ -1,5 +1,6 @@
 package com.nagarseva.backend.service;
 
+import com.cloudinary.Cloudinary;
 import com.nagarseva.backend.dto.RegisterComplaintRequest;
 import com.nagarseva.backend.dto.RegisterComplaintResponse;
 import com.nagarseva.backend.entity.Complaint;
@@ -20,6 +21,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +30,7 @@ public class ComplaintService {
 
     private ComplaintRepository complaintRepository;
     private WardRepository wardRepository;
+    private Cloudinary cloudinary;
 
     public RegisterComplaintResponse addNewComplaint(RegisterComplaintRequest registerComplaintRequest) throws IOException {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -44,7 +48,7 @@ public class ComplaintService {
         }
 
         // Validation for complaint Images
-        if (files != null || !files.isEmpty()) {
+        if (files != null && !files.isEmpty()) {
 
             if (files.size() > 3)
                 throw new MaxImageUploadExceededException("Maximum 3 Images are allowed");
@@ -76,11 +80,11 @@ public class ComplaintService {
         raiseComplaint.setLastUpdatedAt(LocalDateTime.now());
 
         List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : files) {
-            String fileName = file.getOriginalFilename();
-            String path = "C:/NagarSeva/uploads/" + fileName;
-            file.transferTo(new File(path));
-            imageUrls.add(path);
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                String url = uploadFile(file);
+                imageUrls.add(url);
+            }
         }
 
         raiseComplaint.setImageUrls(imageUrls);
@@ -93,5 +97,18 @@ public class ComplaintService {
 
         return response;
 
+    }
+
+    public String uploadFile(MultipartFile file) {
+        try {
+            Map<String, Object> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(), Map.of("folder", "complaints")
+            );
+
+            return uploadResult.get("secure_url").toString();
+
+        } catch (IOException e) {
+            throw new FileUploadException("Failed to upload image");
+        }
     }
 }
