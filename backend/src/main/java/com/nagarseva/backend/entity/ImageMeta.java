@@ -1,0 +1,21 @@
+package com.nagarseva.backend.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "complaint_images")
+public class ImageMeta {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @ManyToOne
+    private Complaint complaint;
+
+    private String imageUrl;
+    private String imagePublicId;
+}

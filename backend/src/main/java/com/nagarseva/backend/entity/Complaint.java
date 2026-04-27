@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.engine.internal.Cascade;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,13 +43,8 @@ public class Complaint {
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "complaint_images",
-            joinColumns = @JoinColumn(name = "complaint_id")
-    )
-    @Column(name = "image_url")
-    private List<String> imageUrls;
+    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL)
+    private List<ImageMeta> images;
 
     private LocalDateTime createdAt;
     private LocalDateTime lastUpdatedAt;

@@ -4,11 +4,13 @@ import com.cloudinary.Cloudinary;
 import com.nagarseva.backend.dto.RegisterComplaintRequest;
 import com.nagarseva.backend.dto.RegisterComplaintResponse;
 import com.nagarseva.backend.entity.Complaint;
+import com.nagarseva.backend.entity.ImageMeta;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.ComplaintRepository;
+import com.nagarseva.backend.repository.ImageMetaRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import lombok.AllArgsConstructor;
@@ -79,15 +81,17 @@ public class ComplaintService {
         raiseComplaint.setCreatedAt(LocalDateTime.now());
         raiseComplaint.setLastUpdatedAt(LocalDateTime.now());
 
-        List<String> imageUrls = new ArrayList<>();
+        List<ImageMeta> images = new ArrayList<>();
+
         if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
-                String url = uploadFile(file);
-                imageUrls.add(url);
+                ImageMeta imageMeta = uploadFile(file);
+                imageMeta.setComplaint(raiseComplaint);
+                images.add(imageMeta);
             }
         }
 
-        raiseComplaint.setImageUrls(imageUrls);
+        raiseComplaint.setImages(images);
         Complaint savedComplaint = complaintRepository.save(raiseComplaint);
 
         RegisterComplaintResponse response = new RegisterComplaintResponse();
@@ -99,13 +103,19 @@ public class ComplaintService {
 
     }
 
-    public String uploadFile(MultipartFile file) {
+    public ImageMeta uploadFile(MultipartFile file) {
         try {
             Map<String, Object> uploadResult = cloudinary.uploader().upload(
                     file.getBytes(), Map.of("folder", "complaints")
             );
 
-            return uploadResult.get("secure_url").toString();
+            String uploadedImageUrl = uploadResult.get("secure_url").toString();
+            String uploadedImagePublicId = uploadResult.get("public_id").toString();
+
+            ImageMeta imageMeta = new ImageMeta();
+            imageMeta.setImageUrl(uploadedImageUrl);
+            imageMeta.setImagePublicId(uploadedImagePublicId);
+            return imageMeta;
 
         } catch (IOException e) {
             throw new FileUploadException("Failed to upload image");
