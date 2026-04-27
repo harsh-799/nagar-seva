@@ -19,7 +19,7 @@ public class ComplaintController {
     private ComplaintService complaintService;
 
     @PostMapping("/citizen/complaint")
-    public ResponseEntity<RegisterComplaintResponse> createNewComplaint(@ModelAttribute RegisterComplaintRequest registerComplaintRequest) throws IOException {
+    public ResponseEntity<RegisterComplaintResponse> createNewComplaint(@Valid @ModelAttribute RegisterComplaintRequest registerComplaintRequest) throws IOException {
         RegisterComplaintResponse resp = complaintService.addNewComplaint(registerComplaintRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
