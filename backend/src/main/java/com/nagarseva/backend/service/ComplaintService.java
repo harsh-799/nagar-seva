@@ -1,10 +1,7 @@
 package com.nagarseva.backend.service;
 
 import com.cloudinary.Cloudinary;
-import com.nagarseva.backend.dto.RegisterComplaintRequest;
-import com.nagarseva.backend.dto.RegisterComplaintResponse;
-import com.nagarseva.backend.dto.UpdateComplaintRequest;
-import com.nagarseva.backend.dto.UpdateComplaintResponse;
+import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.Complaint;
 import com.nagarseva.backend.entity.ImageMeta;
 import com.nagarseva.backend.entity.User;
@@ -174,5 +171,62 @@ public class ComplaintService {
         response.setMessage("Updated Successfully");
 
         return response;
+    }
+
+    public ComplaintDetailsResponse showComplaintsById(int complaintId) {
+        Complaint complaint = complaintRepository.findById(complaintId).orElseThrow(
+                () -> new ComplaintNotExistException("No Complaint Exists by this Id")
+        );
+
+        ComplaintDetailsResponse response = new ComplaintDetailsResponse();
+        response.setSuccess(true);
+        response.setMessage("Data fetched successfully.");
+
+        response.setComplaintId(complaint.getId());
+        response.setTitle(complaint.getTitle());
+        response.setDescription(complaint.getDescription());
+        response.setIssueType(complaint.getIssueType());
+        response.setIssueStatus(complaint.getStatus());
+
+        // Though we ensure that every complaint has valid ward but still it's better to avoid NPE
+        Ward complaintWard = complaint.getWard();
+
+        if (complaintWard != null) {
+            WardResponse wardResponse = new WardResponse();
+            wardResponse.setWardId(complaintWard.getId());
+            wardResponse.setWardName(complaintWard.getWardName());
+            response.setWard(wardResponse);
+        } else {
+            response.setWard(null);
+        }
+
+        // Same goes here, It's must that every ward has councillor but still handling NPE
+        if (complaintWard.getCouncillor() != null) {
+            response.setWardCouncillorName(complaintWard.getCouncillor().getFullName());
+        } else {
+            response.setWardCouncillorName(null);
+        }
+
+        // Useful, when issue is not assigned to any of the Officier by admin yet.
+        if (complaint.getAssignedTo() != null) {
+            response.setAssignedTo(complaint.getAssignedTo().getFullName());
+        } else {
+            response.setAssignedTo(null);
+        }
+
+        List<ImageMeta> complaintImages = complaint.getImages();
+        List<ImageResponse> imageResponses = new ArrayList<>();
+
+        for (ImageMeta img: complaintImages) {
+            ImageResponse imgResp = new ImageResponse();
+            imgResp.setUrl(img.getImageUrl());
+            imgResp.setPublicId(img.getImagePublicId());
+            imageResponses.add(imgResp);
+        }
+
+        response.setImages(imageResponses);
+
+        return response;
+
     }
 }

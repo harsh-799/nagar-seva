@@ -32,5 +32,11 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
+    @GetMapping("/complaint/{id}")
+    public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaints(@PathVariable(name = "id") int complaintId) {
+        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 
 }
