@@ -1,9 +1,8 @@
 package com.nagarseva.backend.controller;
 
-import com.nagarseva.backend.dto.RegisterComplaintRequest;
-import com.nagarseva.backend.dto.RegisterComplaintResponse;
-import com.nagarseva.backend.dto.RegisterUserResponse;
+import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.service.ComplaintService;
+import com.nagarseva.backend.validation.ComplaintUpdateValidator;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,11 +16,21 @@ import java.io.IOException;
 public class ComplaintController {
 
     private ComplaintService complaintService;
+    private ComplaintUpdateValidator complaintUpdateValidator;
 
     @PostMapping("/citizen/complaint")
     public ResponseEntity<RegisterComplaintResponse> createNewComplaint(@Valid @ModelAttribute RegisterComplaintRequest registerComplaintRequest) throws IOException {
         RegisterComplaintResponse resp = complaintService.addNewComplaint(registerComplaintRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
+
+    @PutMapping("/complaint/{id}")
+    public ResponseEntity<UpdateComplaintResponse> updateExistingComplaint(@PathVariable(name = "id") int complaintId, @Valid @ModelAttribute UpdateComplaintRequest updateComplaintRequest) {
+        complaintUpdateValidator.validate(updateComplaintRequest);
+
+        UpdateComplaintResponse resp = complaintService.updateComplaintCitizen(complaintId,updateComplaintRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 
 }

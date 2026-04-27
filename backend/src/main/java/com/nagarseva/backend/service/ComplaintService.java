@@ -3,8 +3,11 @@ package com.nagarseva.backend.service;
 import com.cloudinary.Cloudinary;
 import com.nagarseva.backend.dto.RegisterComplaintRequest;
 import com.nagarseva.backend.dto.RegisterComplaintResponse;
+import com.nagarseva.backend.dto.UpdateComplaintRequest;
+import com.nagarseva.backend.dto.UpdateComplaintResponse;
 import com.nagarseva.backend.entity.Complaint;
 import com.nagarseva.backend.entity.ImageMeta;
+import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
@@ -13,6 +16,7 @@ import com.nagarseva.backend.repository.ComplaintRepository;
 import com.nagarseva.backend.repository.ImageMetaRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -120,5 +124,55 @@ public class ComplaintService {
         } catch (IOException e) {
             throw new FileUploadException("Failed to upload image");
         }
+    }
+
+    public UpdateComplaintResponse updateComplaintCitizen(int complaintId, UpdateComplaintRequest updateComplaintRequest) {
+        CustomUserDetails contextUser = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+
+        User user = contextUser.getUser();
+
+        if (!user.getRole().equals(Role.CITIZEN)) {
+            throw new InvalidUserRoleException("Invalid User! Only Citizen are allowed");
+        }
+
+        Complaint complaint = complaintRepository.findById(complaintId).orElseThrow(
+                () -> new ComplaintNotExistException("No Complaint Exists by this Id")
+        );
+
+        if (!complaint.getCreatedBy().getId().equals(user.getId()))
+            throw new UserMismatchException("Access denied: You cannot edit another user's complaints");
+
+        if (!complaint.getStatus().equals(Status.CREATED))
+            throw new ComplaintModificationForbiddenException("Complaint has already been verified by admin and cannot be edited further.");
+
+        if (updateComplaintRequest.getWardId() != null) {
+            Ward updatedWard = wardRepository.findById(updateComplaintRequest.getWardId()).orElseThrow(
+                    () -> new InvalidWard("Invalid WardId! No ward exists with this Id.")
+            );
+
+            complaint.setWard(updatedWard);
+        }
+
+        if (updateComplaintRequest.getTitle() != null) {
+            complaint.setTitle(updateComplaintRequest.getTitle());
+        }
+
+        if (updateComplaintRequest.getDesc() != null) {
+            complaint.setDescription(updateComplaintRequest.getDesc());
+        }
+
+        if (updateComplaintRequest.getIssueType() != null) {
+            complaint.setIssueType(updateComplaintRequest.getIssueType());
+        }
+
+        complaint.setLastUpdatedAt(LocalDateTime.now());
+        complaintRepository.save(complaint);
+
+        UpdateComplaintResponse response = new UpdateComplaintResponse();
+        response.setSuccess(true);
+        response.setMessage("Updated Successfully");
+
+        return response;
     }
 }
