@@ -176,6 +176,55 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
+    @ExceptionHandler(ComplaintNotExistException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidComplaint(ComplaintNotExistException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Complaint updation failed!");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("complaintId",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(UserMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidComplaint(UserMismatchException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Complaint updation failed!");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("userId",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(NoFieldProvidedException.class)
+    public ResponseEntity<ErrorResponse> handleUpdateComplaintInvalidInput(NoFieldProvidedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintModificationForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleUpdateComplaintAlreadyVerified(ComplaintModificationForbiddenException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+
+
+
 
 
 
