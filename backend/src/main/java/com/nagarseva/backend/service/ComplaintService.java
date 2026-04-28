@@ -12,11 +12,11 @@ import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.ComplaintRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
+import com.nagarseva.backend.validation.ImageValidator;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,6 +29,7 @@ public class ComplaintService {
     private ComplaintRepository complaintRepository;
     private WardRepository wardRepository;
     private Cloudinary cloudinary;
+    private ImageValidator imageValidator;
 
     public RegisterComplaintResponse addNewComplaint(RegisterComplaintRequest registerComplaintRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -51,20 +52,7 @@ public class ComplaintService {
             if (files.size() > 3)
                 throw new MaxImageUploadExceededException("Maximum 3 Images are allowed");
 
-            for (MultipartFile file : files) {
-                if (file.isEmpty())
-                    throw new CorruptedImageException("Images are corruped or empty.");
-
-                String contentType = file.getContentType();
-                System.out.println(contentType);
-                if (contentType == null || !contentType.startsWith("image/"))
-                    throw new UnsupportedFileTypeException("Only images files are allowed");
-
-                long maxSize = 5 * 1024 * 1024;
-                if (file.getSize() > maxSize) {
-                    throw new ImageSizeExceededException("File size should not exceed 5MB");
-                }
-            }
+            imageValidator.validate(files);
         }
 
         Complaint raiseComplaint = new Complaint();
@@ -186,6 +174,10 @@ public class ComplaintService {
         }
 
         if (files != null) {
+            if (currentImages.size() + files.size() > 3)
+                throw new MaxImageUploadExceededException("Maximum 3 Images are allowed");
+
+            imageValidator.validate(files);
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
                     ImageMeta imageMeta = uploadFile(file);
