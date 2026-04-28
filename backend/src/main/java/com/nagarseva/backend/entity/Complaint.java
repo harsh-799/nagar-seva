@@ -43,7 +43,7 @@ public class Complaint {
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
-    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageMeta> images;
 
     private LocalDateTime createdAt;

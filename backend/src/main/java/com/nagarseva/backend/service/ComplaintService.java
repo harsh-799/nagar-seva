@@ -19,13 +19,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -123,7 +122,7 @@ public class ComplaintService {
         }
     }
 
-    public UpdateComplaintResponse updateComplaintCitizen(int complaintId, UpdateComplaintRequest updateComplaintRequest) {
+    public UpdateComplaintResponse updateComplaintCitizen(int complaintId, UpdateComplaintRequest updateComplaintRequest, List<MultipartFile> files) throws IOException {
         CustomUserDetails contextUser = (CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
 
@@ -162,6 +161,44 @@ public class ComplaintService {
         if (updateComplaintRequest.getIssueType() != null) {
             complaint.setIssueType(updateComplaintRequest.getIssueType());
         }
+
+        List<String> updatedImages = updateComplaintRequest.getImagePublicIds();
+        Set<String> updatedSet = updatedImages == null
+                ? new HashSet<>()
+                : new HashSet<>(updatedImages);
+
+        List<ImageMeta> currentImages = complaint.getImages();
+
+        if (currentImages != null) {
+            Iterator<ImageMeta> it = currentImages.iterator();
+
+            while (it.hasNext()) {
+                ImageMeta img = it.next();
+                if (!updatedSet.contains(img.getImagePublicId())) {
+                    Map<String, Object> res = cloudinary.uploader().destroy(img.getImagePublicId(), Collections.emptyMap());
+
+                    if (!res.get("result").equals("ok") && !res.get("result").equals("not found"))
+                        throw new ImageDeletionFailedException("Can't Delete the Image.");
+                    it.remove();
+                }
+            }
+        }
+
+        if (currentImages == null) {
+            currentImages = new ArrayList<>();
+            complaint.setImages(currentImages);
+        }
+
+        if (files != null) {
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    ImageMeta imageMeta = uploadFile(file);
+                    imageMeta.setComplaint(complaint);
+                    currentImages.add(imageMeta);
+                }
+            }
+        }
+
 
         complaint.setLastUpdatedAt(LocalDateTime.now());
         complaintRepository.save(complaint);
