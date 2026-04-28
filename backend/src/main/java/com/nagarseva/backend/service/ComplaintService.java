@@ -53,6 +53,15 @@ public class ComplaintService {
         }
     }
 
+    private User fetchAuthenticatedUser() {
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return user.getUser();
+
+    }
+
     public RegisterComplaintResponse addNewComplaint(RegisterComplaintRequest registerComplaintRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Ward ward = user.getUser().getCitizensWard();
@@ -263,5 +272,32 @@ public class ComplaintService {
 
         return response;
 
+    }
+
+    public DeleteComplaintResponse deleteComplaintById(int complaintId) throws IOException {
+        Complaint complaint = getComplaintOrThrow(complaintId);
+        User user = fetchAuthenticatedUser();
+
+        validateComplaintEditable(complaint);
+        validateCitizen(user);
+        validateOwnership(complaint,user.getId());
+
+        List<ImageMeta> complaintImages = complaint.getImages();
+        if (complaintImages != null) {
+            for (ImageMeta img : complaintImages) {
+                Map<String,Object> res = cloudinary.uploader().destroy(img.getImagePublicId(), Collections.emptyMap());
+
+                if (!res.get("result").equals("ok") && !res.get("result").equals("not found"))
+                    throw new ImageDeletionFailedException("Can't Delete the Image.");
+            }
+        }
+
+        complaintRepository.delete(complaint);
+
+        DeleteComplaintResponse response = new DeleteComplaintResponse();
+        response.setSuccess(true);
+        response.setMessage("Complaint deleted successfully.");
+        response.setComplaintId(complaintId);
+        return response;
     }
 }

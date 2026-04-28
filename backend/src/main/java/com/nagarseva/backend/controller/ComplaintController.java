@@ -39,5 +39,11 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
+    @DeleteMapping("/complaint/{id}")
+    public ResponseEntity<DeleteComplaintResponse> deleteComplaint(@PathVariable(name = "id") int complaintId) throws IOException {
+        DeleteComplaintResponse resp = complaintService.deleteComplaintById(complaintId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 
 }

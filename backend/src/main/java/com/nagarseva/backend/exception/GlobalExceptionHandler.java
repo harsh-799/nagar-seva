@@ -180,28 +180,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidComplaint(ComplaintNotExistException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
-        resp.setMessage("Complaint updation failed!");
+        resp.setMessage("Complaint not found");
 
         Map<String, String> errors = new HashMap<>();
         errors.put("complaintId",ex.getMessage());
 
         resp.setErrors(errors);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp);
     }
 
     @ExceptionHandler(UserMismatchException.class)
     public ResponseEntity<ErrorResponse> handleInvalidComplaint(UserMismatchException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
-        resp.setMessage("Complaint updation failed!");
+        resp.setMessage("You are not allowed to access this complaint");
 
         Map<String, String> errors = new HashMap<>();
         errors.put("userId",ex.getMessage());
 
         resp.setErrors(errors);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resp);
     }
 
     @ExceptionHandler(NoFieldProvidedException.class)
