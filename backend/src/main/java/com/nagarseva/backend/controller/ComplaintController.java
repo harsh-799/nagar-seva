@@ -8,8 +8,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -25,10 +27,9 @@ public class ComplaintController {
     }
 
     @PutMapping("/complaint/{id}")
-    public ResponseEntity<UpdateComplaintResponse> updateExistingComplaint(@PathVariable(name = "id") int complaintId, @Valid @ModelAttribute UpdateComplaintRequest updateComplaintRequest) {
-        complaintUpdateValidator.validate(updateComplaintRequest);
-
-        UpdateComplaintResponse resp = complaintService.updateComplaintCitizen(complaintId,updateComplaintRequest);
+    public ResponseEntity<UpdateComplaintResponse> updateComplaint(@PathVariable(name = "id") int complaintId, @Valid @ModelAttribute UpdateComplaintRequest updateComplaintRequest, @RequestParam(name = "newimages", required = false) List<MultipartFile> multipartFile) throws IOException {
+        complaintUpdateValidator.validate(updateComplaintRequest,multipartFile);
+        UpdateComplaintResponse resp = complaintService.updateComplaintCitizen(complaintId,updateComplaintRequest,multipartFile);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 

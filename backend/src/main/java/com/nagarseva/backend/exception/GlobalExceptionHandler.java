@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
         resp.setSuccess(false);
         resp.setMessage("Validation failed");
 
-        if (errors.get("issueType").contains("Failed to convert property value of type 'java.lang.String")) {
+        if (errors.get("issueType") != null && errors.get("issueType").contains("Failed to convert property value of type 'java.lang.String")) {
             errors.put("issueType", "Kindly Select Issues From [ WATER, ELECTRICITY, SEWAGE, GARBAGE, OTHER ]");
         }
 
