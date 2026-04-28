@@ -31,14 +31,34 @@ public class ComplaintService {
     private Cloudinary cloudinary;
     private ImageValidator imageValidator;
 
+    private Complaint getComplaintOrThrow(int complaintId) {
+        return complaintRepository.findById(complaintId).orElseThrow(
+                () -> new ComplaintNotExistException("No Complaint Exists by this Id")
+        );
+    }
+
+    private void validateOwnership(Complaint complaint, int userId) {
+        if (!complaint.getCreatedBy().getId().equals(userId))
+            throw new UserMismatchException("Access denied: You cannot edit another user's complaints");
+    }
+
+    private void validateComplaintEditable(Complaint complaint) {
+        if (!complaint.getStatus().equals(Status.CREATED))
+            throw new ComplaintModificationForbiddenException("Complaint has already been verified by admin and cannot be edited further.");
+    }
+
+    private void validateCitizen(User user) {
+        if (!user.getRole().equals(Role.CITIZEN)) {
+            throw new InvalidUserRoleException("Invalid User! Only Citizen are allowed");
+        }
+    }
+
     public RegisterComplaintResponse addNewComplaint(RegisterComplaintRequest registerComplaintRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Role userRole = user.getUser().getRole();
         Ward ward = user.getUser().getCitizensWard();
         List<MultipartFile> files = registerComplaintRequest.getImages();
 
-        if (!userRole.equals(Role.CITIZEN))
-            throw new InvalidUserRoleException("Only Citizens are allowed to raise Issues");
+        validateCitizen(user.getUser());
 
         if (registerComplaintRequest.getWardId() != null) {
             ward = wardRepository.findById(registerComplaintRequest.getWardId()).orElseThrow(
@@ -112,19 +132,11 @@ public class ComplaintService {
 
         User user = contextUser.getUser();
 
-        if (!user.getRole().equals(Role.CITIZEN)) {
-            throw new InvalidUserRoleException("Invalid User! Only Citizen are allowed");
-        }
+        validateCitizen(user);
+        Complaint complaint = getComplaintOrThrow(complaintId);
 
-        Complaint complaint = complaintRepository.findById(complaintId).orElseThrow(
-                () -> new ComplaintNotExistException("No Complaint Exists by this Id")
-        );
-
-        if (!complaint.getCreatedBy().getId().equals(user.getId()))
-            throw new UserMismatchException("Access denied: You cannot edit another user's complaints");
-
-        if (!complaint.getStatus().equals(Status.CREATED))
-            throw new ComplaintModificationForbiddenException("Complaint has already been verified by admin and cannot be edited further.");
+        validateOwnership(complaint, user.getId());
+        validateComplaintEditable(complaint);
 
         if (updateComplaintRequest.getWardId() != null) {
             Ward updatedWard = wardRepository.findById(updateComplaintRequest.getWardId()).orElseThrow(
@@ -148,7 +160,7 @@ public class ComplaintService {
 
         List<String> updatedImages = updateComplaintRequest.getImagePublicIds();
         Set<String> updatedSet = updatedImages == null
-                ? new HashSet<>()
+                ? Collections.emptySet()
                 : new HashSet<>(updatedImages);
 
         List<ImageMeta> currentImages = complaint.getImages();
@@ -199,9 +211,7 @@ public class ComplaintService {
     }
 
     public ComplaintDetailsResponse showComplaintsById(int complaintId) {
-        Complaint complaint = complaintRepository.findById(complaintId).orElseThrow(
-                () -> new ComplaintNotExistException("No Complaint Exists by this Id")
-        );
+        Complaint complaint = getComplaintOrThrow(complaintId);
 
         ComplaintDetailsResponse response = new ComplaintDetailsResponse();
         response.setSuccess(true);
