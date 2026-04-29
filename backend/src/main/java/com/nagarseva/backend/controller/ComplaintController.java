@@ -1,6 +1,8 @@
 package com.nagarseva.backend.controller;
 
 import com.nagarseva.backend.dto.*;
+import com.nagarseva.backend.enums.IssueType;
+import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.service.ComplaintService;
 import com.nagarseva.backend.validation.ComplaintUpdateValidator;
 import jakarta.validation.Valid;
@@ -48,9 +50,11 @@ public class ComplaintController {
     @GetMapping("/citizen/complaints")
     public ResponseEntity<UserComplaintResponse> getUserComplaints(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size
-    ) {
-        UserComplaintResponse resp = complaintService.showUserComplaints(page, size);
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) IssueType issueType
+            ) {
+        UserComplaintResponse resp = complaintService.showUserComplaints(page, size, status, issueType);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
 
     }

@@ -9,6 +9,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -238,6 +240,15 @@ public class GlobalExceptionHandler {
         resp.setMessage(ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(resp);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUserRole(MethodArgumentTypeMismatchException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Invalid issue type or status provided in request URL.");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
 

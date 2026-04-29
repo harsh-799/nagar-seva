@@ -6,6 +6,7 @@ import com.nagarseva.backend.entity.Complaint;
 import com.nagarseva.backend.entity.ImageMeta;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
+import com.nagarseva.backend.enums.IssueType;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.exception.*;
@@ -305,7 +306,7 @@ public class ComplaintService {
         return response;
     }
 
-    public UserComplaintResponse showUserComplaints(int page, int size) {
+    public UserComplaintResponse showUserComplaints(int page, int size, Status status, IssueType issueType) {
         User user = fetchAuthenticatedUser();
 
         validateCitizen(user);
@@ -316,7 +317,7 @@ public class ComplaintService {
                 Sort.by("createdAt").descending()
         );
 
-        Page<Complaint> complaintsPage = complaintRepository.findByCreatedBy_Id(user.getId(), pageable);
+        Page<Complaint> complaintsPage = complaintRepository.findByUserIdWithFilters(user.getId(),issueType,status, pageable);
 
         List<Complaint> userComplaintList = complaintsPage.getContent();
 
