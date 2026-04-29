@@ -11,5 +11,7 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Integer> {
 
     List<Complaint> findByWard_Id(Integer wardId);
 
+    List<Complaint> findByCreatedBy_Id(Integer userId);
+
 
 }

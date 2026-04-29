@@ -300,4 +300,34 @@ public class ComplaintService {
         response.setComplaintId(complaintId);
         return response;
     }
+
+    public UserComplaintResponse showUserComplaints() {
+        User user = fetchAuthenticatedUser();
+
+        validateCitizen(user);
+
+        List<Complaint> userComplaintList = complaintRepository.findByCreatedBy_Id(user.getId());
+
+        if (userComplaintList.isEmpty())
+            throw new ComplaintNotExistException("User has no complaints recorded.");
+
+        List<ComplaintRecordResponse> complaintRecordResponsesList = new ArrayList<>();
+
+        for (Complaint complaint : userComplaintList) {
+            ComplaintRecordResponse complaintRecordResponse = new ComplaintRecordResponse();
+            complaintRecordResponse.setComplaintId(complaint.getId());
+            complaintRecordResponse.setTitle(complaint.getTitle());
+            complaintRecordResponse.setIssueType(complaint.getIssueType());
+            complaintRecordResponse.setIssueStatus(complaint.getStatus());
+            complaintRecordResponse.setCreatedAt(complaint.getCreatedAt());
+            complaintRecordResponsesList.add(complaintRecordResponse);
+        }
+
+        UserComplaintResponse response = new UserComplaintResponse();
+        response.setSuccess(true);
+        response.setMessage("Data fetched successfully.");
+        response.setComplaints(complaintRecordResponsesList);
+
+        return response;
+    }
 }
