@@ -5,6 +5,7 @@ import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.InvalidPasswordException;
 import com.nagarseva.backend.exception.InvalidUserCreation;
+import com.nagarseva.backend.exception.MissingDepartmentException;
 import com.nagarseva.backend.exception.UsernameAlreadyTaken;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
@@ -71,6 +72,13 @@ public class UserService {
         user.setRole(registerUserRequest.getRole());
         user.setDefaultPassword(true);
         user.setActive(true);
+
+        if (registerUserRequest.getRole().equals(Role.OFFICER) && registerUserRequest.getDepartment() == null)
+            throw new MissingDepartmentException("Department must be provided while creating a OFFICER.");
+
+        if (registerUserRequest.getRole().equals(Role.OFFICER)) {
+            user.setDepartment(registerUserRequest.getDepartment());
+        }
 
         User savedUser = userRepository.save(user);
 

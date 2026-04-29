@@ -251,6 +251,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
+    @ExceptionHandler(MissingDepartmentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUserRole(MissingDepartmentException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Account creation failed");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("department",ex.getMessage());
+
+        resp.setErrors(errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
 
 
 
