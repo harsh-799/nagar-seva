@@ -308,9 +308,6 @@ public class ComplaintService {
 
         List<Complaint> userComplaintList = complaintRepository.findByCreatedBy_Id(user.getId());
 
-        if (userComplaintList.isEmpty())
-            throw new ComplaintNotExistException("User has no complaints recorded.");
-
         List<ComplaintRecordResponse> complaintRecordResponsesList = new ArrayList<>();
 
         for (Complaint complaint : userComplaintList) {
@@ -325,7 +322,7 @@ public class ComplaintService {
 
         UserComplaintResponse response = new UserComplaintResponse();
         response.setSuccess(true);
-        response.setMessage("Data fetched successfully.");
+        response.setMessage("Complaints fetched successfully.");
         response.setComplaints(complaintRecordResponsesList);
 
         return response;
