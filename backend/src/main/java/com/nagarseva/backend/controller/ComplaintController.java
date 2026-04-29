@@ -46,8 +46,11 @@ public class ComplaintController {
     }
 
     @GetMapping("/citizen/complaints")
-    public ResponseEntity<UserComplaintResponse> getUserComplaints() {
-        UserComplaintResponse resp = complaintService.showUserComplaints();
+    public ResponseEntity<UserComplaintResponse> getUserComplaints(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ) {
+        UserComplaintResponse resp = complaintService.showUserComplaints(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
 
     }

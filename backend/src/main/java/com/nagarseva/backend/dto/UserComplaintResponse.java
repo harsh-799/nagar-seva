@@ -11,5 +11,9 @@ import java.util.List;
 public class UserComplaintResponse {
     private Boolean success;
     private String message;
+    private Integer page;
+    private Integer size;
+    private Long totalElements;
+    private Boolean isLast;
     List<ComplaintRecordResponse> complaints;
 }

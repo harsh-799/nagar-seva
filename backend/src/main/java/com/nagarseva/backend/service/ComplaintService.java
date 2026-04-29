@@ -14,6 +14,10 @@ import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import com.nagarseva.backend.validation.ImageValidator;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -301,12 +305,20 @@ public class ComplaintService {
         return response;
     }
 
-    public UserComplaintResponse showUserComplaints() {
+    public UserComplaintResponse showUserComplaints(int page, int size) {
         User user = fetchAuthenticatedUser();
 
         validateCitizen(user);
 
-        List<Complaint> userComplaintList = complaintRepository.findByCreatedBy_Id(user.getId());
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Complaint> complaintsPage = complaintRepository.findByCreatedBy_Id(user.getId(), pageable);
+
+        List<Complaint> userComplaintList = complaintsPage.getContent();
 
         List<ComplaintRecordResponse> complaintRecordResponsesList = new ArrayList<>();
 
@@ -324,6 +336,10 @@ public class ComplaintService {
         response.setSuccess(true);
         response.setMessage("Complaints fetched successfully.");
         response.setComplaints(complaintRecordResponsesList);
+        response.setPage(complaintsPage.getNumber());
+        response.setSize(complaintsPage.getSize());
+        response.setTotalElements(complaintsPage.getTotalElements());
+        response.setIsLast(complaintsPage.isLast());
 
         return response;
     }
