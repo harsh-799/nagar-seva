@@ -21,6 +21,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -308,7 +310,15 @@ public class ComplaintService {
 
     }
 
-    public DeleteComplaintResponse deleteComplaintById(int complaintId) throws IOException {
+    public void deleteFile(ImageMeta img) throws IOException {
+        Map<String,Object> res = cloudinary.uploader().destroy(img.getImagePublicId(), Collections.emptyMap());
+
+        if (!res.get("result").equals("ok") && !res.get("result").equals("not found"))
+            throw new ImageDeletionFailedException("Can't Delete the Image.");
+    }
+
+    @Transactional
+    public DeleteComplaintResponse deleteComplaintById(int complaintId) {
         Complaint complaint = getComplaintOrThrow(complaintId);
         User user = fetchAuthenticatedUser();
 
@@ -317,16 +327,19 @@ public class ComplaintService {
         validateOwnership(complaint,user.getId());
 
         List<ImageMeta> complaintImages = complaint.getImages();
-        if (complaintImages != null) {
-            for (ImageMeta img : complaintImages) {
-                Map<String,Object> res = cloudinary.uploader().destroy(img.getImagePublicId(), Collections.emptyMap());
-
-                if (!res.get("result").equals("ok") && !res.get("result").equals("not found"))
-                    throw new ImageDeletionFailedException("Can't Delete the Image.");
-            }
-        }
-
         complaintRepository.delete(complaint);
+
+        try {
+            if (complaintImages != null) {
+                for (ImageMeta img : complaintImages) {
+                    deleteFile(img);
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Cloudinary cleanup failed for complaintId: " + complaintId);
+            e.printStackTrace();
+        }
 
         DeleteComplaintResponse response = new DeleteComplaintResponse();
         response.setSuccess(true);
