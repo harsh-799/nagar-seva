@@ -14,4 +14,5 @@ public class ComplaintRecordResponse {
     private IssueType issueType;
     private Status issueStatus;
     private LocalDateTime createdAt;
+    private Integer wardId;
 }
