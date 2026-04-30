@@ -37,6 +37,7 @@ public class ComplaintService {
     private Cloudinary cloudinary;
     private ImageValidator imageValidator;
     private UserRepository userRepository;
+    private FlowTransitionValidationService flowValidation;
 
     private Complaint getComplaintOrThrow(int complaintId) {
         return complaintRepository.findById(complaintId).orElseThrow(
@@ -76,6 +77,10 @@ public class ComplaintService {
     }
 
     private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime) {
+
+        if (complaint.getStatus() != null) {
+            flowValidation.validateTransition(complaint.getStatus(), status);
+        }
 
         List<ComplaintStatusHistory> complaintStatusHistories = complaint.getComplaintStatusHistory();
         if (complaintStatusHistories == null)
@@ -430,6 +435,31 @@ public class ComplaintService {
         response.setSize(complaintsPage.getSize());
         response.setTotalElements(complaintsPage.getTotalElements());
         response.setIsLast(complaintsPage.isLast());
+
+        return response;
+    }
+
+    public ComplaintStartResponse initiateComplaintWork(int complaintId) {
+        User officer = fetchAuthenticatedUser();
+
+        validateOfficer(officer);
+        Complaint complaint = getComplaintOrThrow(complaintId);
+
+        if (complaint.getAssignedTo() == null)
+            throw new ComplaintNotAssignedToOfficerException("Complaint is not assigned to any officer. Cannot initiate work until assignment is complete.");
+
+        if (!complaint.getAssignedTo().getId().equals(officer.getId()))
+            throw new OfficerMismatchException("Complaint is assigned to a different officer. You cannot initiate work on this complaint.");
+
+        LocalDateTime currentTime = LocalDateTime.now();
+        updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime);
+
+        Complaint updatedComplaint = complaintRepository.save(complaint);
+
+        ComplaintStartResponse response = new ComplaintStartResponse();
+        response.setSuccess(true);
+        response.setComplaintId(updatedComplaint.getId());
+        response.setMessage("Officer has begun working on the complaint. Status updated to IN_PROGRESS.");
 
         return response;
     }

@@ -72,4 +72,12 @@ public class ComplaintController {
 
     }
 
+    @PutMapping("/officer/complaint/{id}/start")
+    public ResponseEntity<ComplaintStartResponse> beginComplaintProcessing(
+            @PathVariable(name = "id") int complaintId
+    ) {
+        ComplaintStartResponse resp = complaintService.initiateComplaintWork(complaintId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 }
