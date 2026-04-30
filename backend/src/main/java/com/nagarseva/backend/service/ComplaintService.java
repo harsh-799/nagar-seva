@@ -62,7 +62,7 @@ public class ComplaintService {
 
     private void validateOfficer(User user) {
         if (!user.getRole().equals(Role.OFFICER)) {
-            throw new InvalidUserRoleException("Invalid User! Only Citizen are allowed");
+            throw new InvalidUserRoleException("Invalid User! Only Officer are allowed");
         }
     }
 
