@@ -75,7 +75,7 @@ public class ComplaintService {
 
     }
 
-    private void updateStatusHistory(Status status, Complaint complaint) {
+    private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime) {
 
         List<ComplaintStatusHistory> complaintStatusHistories = complaint.getComplaintStatusHistory();
         if (complaintStatusHistories == null)
@@ -85,14 +85,13 @@ public class ComplaintService {
         complaintStatus.setComplaint(complaint);
         complaintStatus.setStatus(status);
 
-        LocalDateTime currTime = LocalDateTime.now();
-        complaintStatus.setChangedAt(currTime);
+        complaintStatus.setChangedAt(currentTime);
 
         complaintStatusHistories.add(complaintStatus);
 
         complaint.setStatus(status);
         complaint.setComplaintStatusHistory(complaintStatusHistories);
-        complaint.setLastUpdatedAt(currTime);
+        complaint.setLastUpdatedAt(currentTime);
 
     }
 
@@ -125,24 +124,37 @@ public class ComplaintService {
         raiseComplaint.setDescription(registerComplaintRequest.getDesc());
         raiseComplaint.setWard(ward);
 
-        updateStatusHistory(Status.CREATED, raiseComplaint);
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        updateStatusHistory(Status.CREATED, raiseComplaint, currentTime);
 
         raiseComplaint.setCreatedBy(user.getUser());
-        raiseComplaint.setCreatedAt(LocalDateTime.now());
+        raiseComplaint.setCreatedAt(currentTime);
 
         List<ImageMeta> images = new ArrayList<>();
+        Complaint savedComplaint = null;
 
-        if (files != null && !files.isEmpty()) {
-            for (MultipartFile file : files) {
-                ImageMeta imageMeta = uploadFile(file);
-                imageMeta.setComplaint(raiseComplaint);
-                images.add(imageMeta);
+        try {
+            if (files != null && !files.isEmpty()) {
+                for (MultipartFile file : files) {
+                    ImageMeta imageMeta = uploadFile(file);
+                    imageMeta.setComplaint(raiseComplaint);
+                    images.add(imageMeta);
+                }
             }
+            raiseComplaint.setImages(images);
+            savedComplaint = complaintRepository.save(raiseComplaint);
+        } catch (Exception e) {
+            for (ImageMeta img: images) {
+                try {
+                    deleteFile(img);
+                } catch (IOException e1) {
+                    System.out.println("Cloudinary cleanup failed for complaint");
+                    e1.printStackTrace();
+                }
+            }
+            throw new RuntimeException("Complaint creation failed", e);
         }
-
-        raiseComplaint.setImages(images);
-        Complaint savedComplaint = complaintRepository.save(raiseComplaint);
-
         RegisterComplaintResponse response = new RegisterComplaintResponse();
         response.setComplaintId(savedComplaint.getId());
         response.setSuccess(true);
@@ -152,23 +164,18 @@ public class ComplaintService {
 
     }
 
-    public ImageMeta uploadFile(MultipartFile file) {
-        try {
-            Map<String, Object> uploadResult = cloudinary.uploader().upload(
-                    file.getBytes(), Map.of("folder", "complaints")
-            );
+    public ImageMeta uploadFile(MultipartFile file) throws IOException {
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(
+                file.getBytes(), Map.of("folder", "complaints")
+        );
 
-            String uploadedImageUrl = uploadResult.get("secure_url").toString();
-            String uploadedImagePublicId = uploadResult.get("public_id").toString();
+        String uploadedImageUrl = uploadResult.get("secure_url").toString();
+        String uploadedImagePublicId = uploadResult.get("public_id").toString();
 
-            ImageMeta imageMeta = new ImageMeta();
-            imageMeta.setImageUrl(uploadedImageUrl);
-            imageMeta.setImagePublicId(uploadedImagePublicId);
-            return imageMeta;
-
-        } catch (IOException e) {
-            throw new FileUploadException("Failed to upload image");
-        }
+        ImageMeta imageMeta = new ImageMeta();
+        imageMeta.setImageUrl(uploadedImageUrl);
+        imageMeta.setImagePublicId(uploadedImagePublicId);
+        return imageMeta;
     }
 
     public UpdateComplaintResponse updateComplaintCitizen(int complaintId, UpdateComplaintRequest updateComplaintRequest, List<MultipartFile> files) throws IOException {
