@@ -11,6 +11,7 @@ import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.ComplaintRepository;
+import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import com.nagarseva.backend.validation.ImageValidator;
@@ -35,6 +36,7 @@ public class ComplaintService {
     private WardRepository wardRepository;
     private Cloudinary cloudinary;
     private ImageValidator imageValidator;
+    private UserRepository userRepository;
 
     private Complaint getComplaintOrThrow(int complaintId) {
         return complaintRepository.findById(complaintId).orElseThrow(
@@ -54,6 +56,12 @@ public class ComplaintService {
 
     private void validateCitizen(User user) {
         if (!user.getRole().equals(Role.CITIZEN)) {
+            throw new InvalidUserRoleException("Invalid User! Only Citizen are allowed");
+        }
+    }
+
+    private void validateOfficer(User user) {
+        if (!user.getRole().equals(Role.OFFICER)) {
             throw new InvalidUserRoleException("Invalid User! Only Citizen are allowed");
         }
     }
@@ -306,7 +314,7 @@ public class ComplaintService {
         return response;
     }
 
-    public UserComplaintResponse showUserComplaints(int page, int size, Status status, IssueType issueType) {
+    public ComplaintPageResponse showUserComplaints(int page, int size, Status status, IssueType issueType) {
         User user = fetchAuthenticatedUser();
 
         validateCitizen(user);
@@ -333,7 +341,47 @@ public class ComplaintService {
             complaintRecordResponsesList.add(complaintRecordResponse);
         }
 
-        UserComplaintResponse response = new UserComplaintResponse();
+        ComplaintPageResponse response = new ComplaintPageResponse();
+        response.setSuccess(true);
+        response.setMessage("Complaints fetched successfully.");
+        response.setComplaints(complaintRecordResponsesList);
+        response.setPage(complaintsPage.getNumber());
+        response.setSize(complaintsPage.getSize());
+        response.setTotalElements(complaintsPage.getTotalElements());
+        response.setIsLast(complaintsPage.isLast());
+
+        return response;
+    }
+
+    public ComplaintPageResponse showOfficerComplaints(int page, int size, Status status, Integer wardId) {
+        User user = fetchAuthenticatedUser();
+
+        validateOfficer(user);
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Complaint> complaintsPage = complaintRepository.findByOfficerIdAndFilters(user.getId(), wardId, status, pageable);
+
+        List<Complaint> officerComplaintList = complaintsPage.getContent();
+
+        List<ComplaintRecordResponse> complaintRecordResponsesList = new ArrayList<>();
+
+        for (Complaint complaint : officerComplaintList) {
+            ComplaintRecordResponse complaintRecordResponse = new ComplaintRecordResponse();
+            complaintRecordResponse.setComplaintId(complaint.getId());
+            complaintRecordResponse.setTitle(complaint.getTitle());
+            complaintRecordResponse.setIssueType(complaint.getIssueType());
+            complaintRecordResponse.setIssueStatus(complaint.getStatus());
+            complaintRecordResponse.setCreatedAt(complaint.getCreatedAt());
+            complaintRecordResponse.setWardId(complaint.getWard().getId());
+            complaintRecordResponsesList.add(complaintRecordResponse);
+        }
+
+        ComplaintPageResponse response = new ComplaintPageResponse();
         response.setSuccess(true);
         response.setMessage("Complaints fetched successfully.");
         response.setComplaints(complaintRecordResponsesList);

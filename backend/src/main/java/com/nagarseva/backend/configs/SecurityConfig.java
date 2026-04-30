@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/citizen/**").hasRole("CITIZEN")
+                .requestMatchers("/officer/**").hasRole("OFFICER")
                 .anyRequest().authenticated()
         );
         http.csrf(csrf -> csrf.disable());

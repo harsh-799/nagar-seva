@@ -1,6 +1,7 @@
 package com.nagarseva.backend.repository;
 
 import com.nagarseva.backend.entity.Complaint;
+import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.IssueType;
 import com.nagarseva.backend.enums.Status;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,18 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Integer> {
     Page<Complaint> findByUserIdWithFilters(
             @Param("userId")Integer userId,
             @Param("issueType") IssueType issueType,
+            @Param("issueStatus") Status issueStatus,
+            Pageable pageable);
+
+    @Query("""
+            SELECT c FROM Complaint c
+            WHERE c.assignedTo.id = :userId
+            AND (:ward IS NULL OR c.ward.id = :ward)
+            AND (:issueStatus IS NULL OR c.status = :issueStatus)
+            """)
+    Page<Complaint> findByOfficerIdAndFilters(
+            @Param("userId")Integer userId,
+            @Param("ward") Integer wardId,
             @Param("issueStatus") Status issueStatus,
             Pageable pageable);
 }

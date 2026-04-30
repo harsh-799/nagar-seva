@@ -1,6 +1,7 @@
 package com.nagarseva.backend.controller;
 
 import com.nagarseva.backend.dto.*;
+import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.IssueType;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.service.ComplaintService;
@@ -48,16 +49,27 @@ public class ComplaintController {
     }
 
     @GetMapping("/citizen/complaints")
-    public ResponseEntity<UserComplaintResponse> getUserComplaints(
+    public ResponseEntity<ComplaintPageResponse> getUserComplaints(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size,
             @RequestParam(required = false) Status status,
             @RequestParam(required = false) IssueType issueType
             ) {
-        UserComplaintResponse resp = complaintService.showUserComplaints(page, size, status, issueType);
+        ComplaintPageResponse resp = complaintService.showUserComplaints(page, size, status, issueType);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
 
     }
 
+    @GetMapping("/officer/complaints")
+    public ResponseEntity<ComplaintPageResponse> getOfficerComplaints(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Integer wardId
+    ) {
+        ComplaintPageResponse resp = complaintService.showOfficerComplaints(page, size, status, wardId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+
+    }
 
 }
