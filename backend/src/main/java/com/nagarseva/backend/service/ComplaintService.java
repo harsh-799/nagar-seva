@@ -3,6 +3,7 @@ package com.nagarseva.backend.service;
 import com.cloudinary.Cloudinary;
 import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.*;
+import com.nagarseva.backend.enums.ImageType;
 import com.nagarseva.backend.enums.IssueType;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
@@ -144,6 +145,7 @@ public class ComplaintService {
                 for (MultipartFile file : files) {
                     ImageMeta imageMeta = uploadFile(file);
                     imageMeta.setComplaint(raiseComplaint);
+                    imageMeta.setImageType(ImageType.BEFORE);
                     images.add(imageMeta);
                 }
             }
@@ -251,6 +253,7 @@ public class ComplaintService {
                 if (!file.isEmpty()) {
                     ImageMeta imageMeta = uploadFile(file);
                     imageMeta.setComplaint(complaint);
+                    imageMeta.setImageType(ImageType.BEFORE);
                     currentImages.add(imageMeta);
                 }
             }

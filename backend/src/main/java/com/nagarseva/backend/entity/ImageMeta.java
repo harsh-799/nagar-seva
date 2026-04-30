@@ -1,5 +1,6 @@
 package com.nagarseva.backend.entity;
 
+import com.nagarseva.backend.enums.ImageType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,8 @@ public class ImageMeta {
 
     @ManyToOne
     private Complaint complaint;
+
+    private ImageType imageType;
 
     private String imageUrl;
     private String imagePublicId;
