@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.engine.internal.Cascade;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +28,9 @@ public class Complaint {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComplaintStatusHistory> complaintStatusHistory;
 
     @ManyToOne
     @JoinColumn(name = "ward_id")
