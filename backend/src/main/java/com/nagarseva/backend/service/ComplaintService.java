@@ -2,10 +2,7 @@ package com.nagarseva.backend.service;
 
 import com.cloudinary.Cloudinary;
 import com.nagarseva.backend.dto.*;
-import com.nagarseva.backend.entity.Complaint;
-import com.nagarseva.backend.entity.ImageMeta;
-import com.nagarseva.backend.entity.User;
-import com.nagarseva.backend.entity.Ward;
+import com.nagarseva.backend.entity.*;
 import com.nagarseva.backend.enums.IssueType;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
@@ -15,6 +12,7 @@ import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import com.nagarseva.backend.validation.ImageValidator;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -75,6 +73,28 @@ public class ComplaintService {
 
     }
 
+    private void updateStatusHistory(Status status, Complaint complaint) {
+
+        List<ComplaintStatusHistory> complaintStatusHistories = complaint.getComplaintStatusHistory();
+        if (complaintStatusHistories == null)
+            complaintStatusHistories = new ArrayList<>();
+
+        ComplaintStatusHistory complaintStatus = new ComplaintStatusHistory();
+        complaintStatus.setComplaint(complaint);
+        complaintStatus.setStatus(status);
+
+        LocalDateTime currTime = LocalDateTime.now();
+        complaintStatus.setChangedAt(currTime);
+
+        complaintStatusHistories.add(complaintStatus);
+
+        complaint.setStatus(status);
+        complaint.setComplaintStatusHistory(complaintStatusHistories);
+        complaint.setLastUpdatedAt(currTime);
+
+    }
+
+    @Transactional
     public RegisterComplaintResponse addNewComplaint(RegisterComplaintRequest registerComplaintRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Ward ward = user.getUser().getCitizensWard();
@@ -102,10 +122,11 @@ public class ComplaintService {
         raiseComplaint.setIssueType(registerComplaintRequest.getIssueType());
         raiseComplaint.setDescription(registerComplaintRequest.getDesc());
         raiseComplaint.setWard(ward);
-        raiseComplaint.setStatus(Status.CREATED);
+
+        updateStatusHistory(Status.CREATED, raiseComplaint);
+
         raiseComplaint.setCreatedBy(user.getUser());
         raiseComplaint.setCreatedAt(LocalDateTime.now());
-        raiseComplaint.setLastUpdatedAt(LocalDateTime.now());
 
         List<ImageMeta> images = new ArrayList<>();
 
