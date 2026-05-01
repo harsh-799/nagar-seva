@@ -29,20 +29,26 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
-    @PutMapping("/complaint/{id}")
+    @PutMapping("/citizen/complaint/{id}")
     public ResponseEntity<UpdateComplaintResponse> updateComplaint(@PathVariable(name = "id") int complaintId, @Valid @ModelAttribute UpdateComplaintRequest updateComplaintRequest, @RequestParam(name = "newimages", required = false) List<MultipartFile> multipartFile) throws IOException {
         complaintUpdateValidator.validate(updateComplaintRequest,multipartFile);
         UpdateComplaintResponse resp = complaintService.updateComplaintCitizen(complaintId,updateComplaintRequest,multipartFile);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
-    @GetMapping("/complaint/{id}")
-    public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaints(@PathVariable(name = "id") int complaintId) {
+    @GetMapping("/citizen/complaint/{id}")
+    public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaintsCitizen(@PathVariable(name = "id") int complaintId) {
         ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
-    @DeleteMapping("/complaint/{id}")
+    @GetMapping("/admin/complaint/{id}")
+    public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaintsAdmin(@PathVariable(name = "id") int complaintId) {
+        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+    @DeleteMapping("/citizen/complaint/{id}")
     public ResponseEntity<DeleteComplaintResponse> deleteComplaint(@PathVariable(name = "id") int complaintId) throws IOException {
         DeleteComplaintResponse resp = complaintService.deleteComplaintById(complaintId);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
@@ -90,7 +96,6 @@ public class ComplaintController {
         ComplaintCompletionResponse resp = complaintService.markComplaintCompletedByOfficer(complaintId, images, remarks);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
-
 
 
 }
