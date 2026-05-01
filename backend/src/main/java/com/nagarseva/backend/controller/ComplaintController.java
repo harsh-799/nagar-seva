@@ -80,4 +80,17 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
+    @PutMapping("/officer/complaint/{id}/finish")
+    public ResponseEntity<ComplaintCompletionResponse> finishComplaintProcessing(
+            @PathVariable(name = "id") int complaintId,
+            @RequestParam(name = "images") List<MultipartFile> images,
+            @RequestParam(name = "remark", required = false) String remarks
+
+    ) {
+        ComplaintCompletionResponse resp = complaintService.markComplaintCompletedByOfficer(complaintId, images, remarks);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+
+
 }

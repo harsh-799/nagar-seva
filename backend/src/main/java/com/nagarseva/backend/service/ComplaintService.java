@@ -9,6 +9,7 @@ import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.ComplaintRepository;
+import com.nagarseva.backend.repository.ImageMetaRepository;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
@@ -39,6 +40,7 @@ public class ComplaintService {
     private ImageValidator imageValidator;
     private UserRepository userRepository;
     private FlowTransitionValidationService flowValidation;
+    private ImageMetaRepository imageMetaRepository;
 
     private Complaint getComplaintOrThrow(int complaintId) {
         return complaintRepository.findById(complaintId).orElseThrow(
@@ -77,7 +79,7 @@ public class ComplaintService {
 
     }
 
-    private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime) {
+    private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime, String remark) {
 
         if (complaint.getStatus() != null) {
             flowValidation.validateTransition(complaint.getStatus(), status);
@@ -92,6 +94,8 @@ public class ComplaintService {
         complaintStatus.setStatus(status);
 
         complaintStatus.setChangedAt(currentTime);
+
+        if (remark != null && !remark.isBlank() && status.equals(Status.PENDING_VERIFICATION)) complaintStatus.setRemark(remark);
 
         complaintStatusHistories.add(complaintStatus);
 
@@ -132,7 +136,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.CREATED, raiseComplaint, currentTime);
+        updateStatusHistory(Status.CREATED, raiseComplaint, currentTime,null);
 
         raiseComplaint.setCreatedBy(user.getUser());
         raiseComplaint.setCreatedAt(currentTime);
@@ -455,7 +459,7 @@ public class ComplaintService {
             throw new OfficerMismatchException("Complaint is assigned to a different officer. You cannot initiate work on this complaint.");
 
         LocalDateTime currentTime = LocalDateTime.now();
-        updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime);
+        updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime, null);
 
         Complaint updatedComplaint = complaintRepository.save(complaint);
 
@@ -463,6 +467,77 @@ public class ComplaintService {
         response.setSuccess(true);
         response.setComplaintId(updatedComplaint.getId());
         response.setMessage("Officer has begun working on the complaint. Status updated to IN_PROGRESS.");
+
+        return response;
+    }
+
+    @Transactional
+    public ComplaintCompletionResponse markComplaintCompletedByOfficer(int complaintId, List<MultipartFile> images, String remark) {
+        User officer = fetchAuthenticatedUser();
+
+        validateOfficer(officer);
+        Complaint complaint = getComplaintOrThrow(complaintId);
+
+        if (complaint.getAssignedTo() == null)
+            throw new ComplaintNotAssignedToOfficerException("Complaint is not assigned to any officer. Cannot initiate work until assignment is complete.");
+
+        if (!complaint.getAssignedTo().getId().equals(officer.getId()))
+            throw new OfficerMismatchException("Complaint is assigned to a different officer. You cannot initiate work on this complaint.");
+
+        if (complaint.getStatus() != Status.IN_PROGRESS) {
+            throw new ComplaintStatusMismatchException(
+                    "Complaint must be IN_PROGRESS to mark as completed"
+            );
+        }
+
+        if (images == null || images.isEmpty())
+            throw new ComplaintCompletionImagesMissingException("Completion work images are required before marking the complaint as completed. Please upload the necessary files.");
+
+        imageValidator.validate(images);
+
+        if (images.size() > 3)
+            throw new MaxImageUploadExceededException("Maximum 3 Images are allowed");
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        List<ImageMeta> currentComplaintImages = complaint.getImages();
+
+        if (currentComplaintImages == null) {
+            currentComplaintImages = new ArrayList<>();
+        }
+
+        Complaint updatedComplaint = null;
+        List<ImageMeta> completionImages = new ArrayList<>();
+
+        try {
+            for (MultipartFile file: images) {
+                ImageMeta imgMeta = uploadFile(file);
+                imgMeta.setComplaint(complaint);
+                imgMeta.setImageType(ImageType.AFTER);
+                completionImages.add(imgMeta);
+            }
+            currentComplaintImages.addAll(completionImages);
+            updateStatusHistory(Status.PENDING_VERIFICATION, complaint, currentTime, remark);
+            complaint.setImages(currentComplaintImages);
+            updatedComplaint = complaintRepository.save(complaint);
+        } catch (Exception e) {
+
+            try {
+                for (ImageMeta img : completionImages) {
+                    deleteFile(img);
+                }
+            } catch (IOException e1) {
+                System.out.println("Cloudinary Cleanup failed");
+            }
+
+            throw new RuntimeException("Failed to upload in Cloudinary, Rolling back", e.printStackTrace(););
+        }
+
+        ComplaintCompletionResponse response = new ComplaintCompletionResponse();
+        response.setSuccess(true);
+        response.setMessage("Complaint marked as completed. Forwarded to citizen for verification.");
+        response.setStatus(complaint.getStatus());
+        response.setComplaintId(updatedComplaint.getId());
 
         return response;
     }
