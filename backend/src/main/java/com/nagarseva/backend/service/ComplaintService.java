@@ -567,13 +567,36 @@ public class ComplaintService {
         return response;
     }
 
-    public ComplaintDetailsResponse getCompletedComplaintsByOfficer(int complaintId, Status status) {
-        User citizen = fetchAuthenticatedUser();
+    @Transactional
+    public ComplaintResolutionResponse approveWorkDoneByCitizen(int complaintId) {
+        User user = fetchAuthenticatedUser();
         Complaint complaint = getComplaintOrThrow(complaintId);
 
-        validateCitizen(citizen);
-        validateOwnership(complaint, citizen.getId());
+        validateCitizen(user);
+        validateOwnership(complaint, user.getId());
 
+        if (complaint.getStatus() != Status.PENDING_VERIFICATION)
+            throw new ComplaintApprovalFailedException("Action denied: Complaint approval is only allowed when status is PENDING_VERIFICATION.");
 
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        updateStatusHistory(Status.CLOSED, complaint, currentTime, null);
+
+        complaint.setClosedAt(currentTime);
+
+        Complaint approvedComplaint = complaintRepository.save(complaint);
+
+        ComplaintResolutionResponse response = new ComplaintResolutionResponse();
+        response.setComplaintId(approvedComplaint.getId());
+        response.setCitizenName(approvedComplaint.getCreatedBy().getFullName());
+        response.setSuccess(true);
+        response.setMessage("Work completed and approved by citizen.");
+        response.setStatus(approvedComplaint.getStatus());
+        if (approvedComplaint.getAssignedTo() != null) {
+            response.setOfficerName(approvedComplaint.getAssignedTo().getFullName());
+        }
+        response.setResolvedAt(approvedComplaint.getClosedAt());
+
+        return response;
     }
 }
