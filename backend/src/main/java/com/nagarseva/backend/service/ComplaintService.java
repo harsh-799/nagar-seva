@@ -164,7 +164,7 @@ public class ComplaintService {
                     e1.printStackTrace();
                 }
             }
-            throw new RuntimeException("Complaint creation failed", e);
+            throw new ComplaintCreationFailedException("Complaint creation failed: Complaint could not be persisted due to an unexpected error.");
         }
         RegisterComplaintResponse response = new RegisterComplaintResponse();
         response.setComplaintId(savedComplaint.getId());
@@ -530,7 +530,8 @@ public class ComplaintService {
                 System.out.println("Cloudinary Cleanup failed");
             }
 
-            throw new RuntimeException("Failed to upload in Cloudinary, Rolling back", e.printStackTrace(););
+            e.printStackTrace();
+            throw new ComplaintSubmissionFailedException("Complaint submission failed: Please try again later.");
         }
 
         ComplaintCompletionResponse response = new ComplaintCompletionResponse();

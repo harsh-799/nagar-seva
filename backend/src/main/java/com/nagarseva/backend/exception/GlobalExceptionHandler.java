@@ -265,6 +265,105 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
+    @ExceptionHandler(EmptyFileUploadException.class)
+    public ResponseEntity<ErrorResponse> handleEmptyFileUpload(EmptyFileUploadException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Image upload fails " + ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(UnsupportedFileTypeException.class)
+    public ResponseEntity<ErrorResponse> handleUnsupportedFileUpload(UnsupportedFileTypeException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Image upload fails " + ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ImageSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleLargeImageUpload(ImageSizeExceededException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Image upload fails " + ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintNotAssignedToOfficerException.class)
+    public ResponseEntity<ErrorResponse> handleComplaintNotAssignedToOfficer(ComplaintNotAssignedToOfficerException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(OfficerMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOfficer(OfficerMismatchException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintStatusMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleComplaintMismatch(ComplaintStatusMismatchException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Complaint already marked as done "+ ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    // Though, this will be handled by our image validator only, but still keeping it so that app doesn't crashes silently.
+    @ExceptionHandler(ComplaintCompletionImagesMissingException.class)
+    public ResponseEntity<ErrorResponse> handleCompletionImagesMissing(ComplaintCompletionImagesMissingException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(MaxImageUploadExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxImageUploadExceeded(MaxImageUploadExceededException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage("Image upload fails " + ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintCreationFailedException.class)
+    public ResponseEntity<ErrorResponse> handleMaxImageUploadExceeded(ComplaintCreationFailedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintSubmissionFailedException.class)
+    public ResponseEntity<ErrorResponse> handleComplaintSubmissionFailed(ComplaintSubmissionFailedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+
+
+
+
+
+
+
+
 
 
 

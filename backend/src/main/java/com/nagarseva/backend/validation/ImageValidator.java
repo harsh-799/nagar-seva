@@ -13,7 +13,7 @@ public class ImageValidator {
     public void validate(List<MultipartFile> files) {
         for (MultipartFile file : files) {
             if (file.isEmpty())
-                throw new EmptyFileUploadException("File is empty");
+                throw new EmptyFileUploadException("No file content provided.");
 
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/"))
