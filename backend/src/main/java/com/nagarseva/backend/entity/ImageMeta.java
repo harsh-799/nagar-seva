@@ -17,6 +17,7 @@ public class ImageMeta {
     @ManyToOne
     private Complaint complaint;
 
+    @Enumerated(EnumType.STRING)
     private ImageType imageType;
 
     private String imageUrl;
