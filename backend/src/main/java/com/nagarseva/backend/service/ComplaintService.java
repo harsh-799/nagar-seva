@@ -325,6 +325,30 @@ public class ComplaintService {
 
         response.setImages(imageResponses);
 
+        List<String> completionWorkImages = new ArrayList<>();
+
+        Status status = complaint.getStatus();
+
+        if (status == Status.PENDING_VERIFICATION || status == Status.CLOSED || status == Status.AUTO_CLOSED) {
+            completionWorkImages = complaintImages
+                    .stream()
+                    .filter(img ->
+                            img.getImageType().equals(ImageType.AFTER))
+                    .map(ImageMeta::getImageUrl)
+                            .toList();
+
+            response.setAfterImages(completionWorkImages);
+            ComplaintStatusHistory history = complaint.getComplaintStatusHistory()
+                    .stream()
+                    .filter(type -> type.getStatus() == Status.PENDING_VERIFICATION)
+                    .max(Comparator.comparing(ComplaintStatusHistory::getChangedAt))
+                    .orElse(null);
+
+            if (history != null && history.getRemark() != null && !history.getRemark().isBlank())
+                response.setRemarks(history.getRemark());
+
+        }
+
         return response;
 
     }
@@ -541,5 +565,15 @@ public class ComplaintService {
         response.setComplaintId(updatedComplaint.getId());
 
         return response;
+    }
+
+    public ComplaintDetailsResponse getCompletedComplaintsByOfficer(int complaintId, Status status) {
+        User citizen = fetchAuthenticatedUser();
+        Complaint complaint = getComplaintOrThrow(complaintId);
+
+        validateCitizen(citizen);
+        validateOwnership(complaint, citizen.getId());
+
+
     }
 }

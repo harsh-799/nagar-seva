@@ -11,6 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ComplaintDetailsResponse {
     private Boolean success;
     private String message;
@@ -23,4 +24,6 @@ public class ComplaintDetailsResponse {
     private String wardCouncillorName;
     private String assignedTo;
     private List<ImageResponse> images;
+    private List<String> afterImages;
+    private String remarks;
 }
