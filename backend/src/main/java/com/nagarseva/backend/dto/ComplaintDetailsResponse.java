@@ -26,4 +26,6 @@ public class ComplaintDetailsResponse {
     private List<ImageResponse> images;
     private List<String> afterImages;
     private String remarks;
+    private String citizenRemark;
+    private String citizenContactDetails;
 }

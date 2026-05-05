@@ -344,6 +344,7 @@ public class ComplaintService {
                             .toList();
 
             response.setAfterImages(completionWorkImages);
+
             ComplaintStatusHistory history = complaint.getComplaintStatusHistory()
                     .stream()
                     .filter(type -> type.getStatus() == Status.PENDING_VERIFICATION)
@@ -354,6 +355,8 @@ public class ComplaintService {
                 response.setRemarks(history.getRemark());
 
         }
+
+        addReopenedDetails(complaint, response);
 
         return response;
 
@@ -636,6 +639,38 @@ public class ComplaintService {
         response.setRejectedAt(rejectedComplaint.getLastUpdatedAt());
         response.setMessage("Complaint rejected. Your feedback and contact details recorded.");
 
+        return response;
+    }
+
+    public ComplaintDetailsResponse addReopenedDetails(Complaint complaint, ComplaintDetailsResponse response) {
+
+        if (complaint.getStatus() != Status.REOPENED) {
+            return response;
+        }
+
+        List<ComplaintStatusHistory> complaintStatusHistories = complaint.getComplaintStatusHistory();
+
+        if (complaintStatusHistories != null && !complaintStatusHistories.isEmpty()) {
+            ComplaintStatusHistory latestReopenedStatusHistory =
+                    complaintStatusHistories.stream()
+                            .filter(type -> type.getStatus() == Status.REOPENED)
+                            .max(Comparator.comparing(ComplaintStatusHistory::getChangedAt))
+                            .orElse(null);
+
+            if (latestReopenedStatusHistory != null) {
+                String latestReopenedCitizenRemark = latestReopenedStatusHistory.getRemark();
+                String latestReopenedCitizenContactDetails = latestReopenedStatusHistory.getContactDetails();
+
+               if (latestReopenedCitizenRemark != null && !latestReopenedCitizenRemark.isBlank()) {
+                   response.setCitizenRemark(latestReopenedCitizenRemark);
+               }
+
+               if (latestReopenedCitizenContactDetails != null && !latestReopenedCitizenContactDetails.isBlank()) {
+                   response.setCitizenContactDetails(latestReopenedCitizenContactDetails);
+               }
+
+             }
+        }
         return response;
     }
 

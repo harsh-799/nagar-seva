@@ -78,6 +78,12 @@ public class ComplaintController {
 
     }
 
+    @GetMapping("/officer/complaint/{id}")
+    public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaintsOfficer(@PathVariable(name = "id") int complaintId) {
+        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
     @PutMapping("/officer/complaint/{id}/start")
     public ResponseEntity<ComplaintStartResponse> beginComplaintProcessing(
             @PathVariable(name = "id") int complaintId
