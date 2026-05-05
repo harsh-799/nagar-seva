@@ -105,5 +105,15 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
+    @PutMapping("/citizen/complaints/{id}/reject")
+    public ResponseEntity<ComplaintRejectionResponse> rejectComplaintCompletionByCitizen(
+            @PathVariable(name = "id") int complaintId,
+            @Valid
+            @RequestBody ComplaintRejectionRequest complaintRejectionRequest
+    ) {
+        ComplaintRejectionResponse resp = complaintService.rejectWorkDoneByCitizen(complaintId, complaintRejectionRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 
 }

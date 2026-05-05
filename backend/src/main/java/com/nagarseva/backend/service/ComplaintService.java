@@ -79,7 +79,7 @@ public class ComplaintService {
 
     }
 
-    private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime, String remark) {
+    private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime, String remark, String contactDetails) {
 
         if (complaint.getStatus() != null) {
             flowValidation.validateTransition(complaint.getStatus(), status);
@@ -95,7 +95,13 @@ public class ComplaintService {
 
         complaintStatus.setChangedAt(currentTime);
 
-        if (remark != null && !remark.isBlank() && status.equals(Status.PENDING_VERIFICATION)) complaintStatus.setRemark(remark);
+        if (remark != null && !remark.isBlank() &&
+                (status == Status.PENDING_VERIFICATION || status == Status.REOPENED)) {
+            complaintStatus.setRemark(remark);
+        }
+
+        if (contactDetails != null && !contactDetails.isBlank() && status.equals(Status.REOPENED))
+            complaintStatus.setContactDetails(contactDetails);
 
         complaintStatusHistories.add(complaintStatus);
 
@@ -136,7 +142,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.CREATED, raiseComplaint, currentTime,null);
+        updateStatusHistory(Status.CREATED, raiseComplaint, currentTime,null,null);
 
         raiseComplaint.setCreatedBy(user.getUser());
         raiseComplaint.setCreatedAt(currentTime);
@@ -483,7 +489,7 @@ public class ComplaintService {
             throw new OfficerMismatchException("Complaint is assigned to a different officer. You cannot initiate work on this complaint.");
 
         LocalDateTime currentTime = LocalDateTime.now();
-        updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime, null);
+        updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime, null,null);
 
         Complaint updatedComplaint = complaintRepository.save(complaint);
 
@@ -541,7 +547,7 @@ public class ComplaintService {
                 completionImages.add(imgMeta);
             }
             currentComplaintImages.addAll(completionImages);
-            updateStatusHistory(Status.PENDING_VERIFICATION, complaint, currentTime, remark);
+            updateStatusHistory(Status.PENDING_VERIFICATION, complaint, currentTime, remark, null);
             complaint.setImages(currentComplaintImages);
             updatedComplaint = complaintRepository.save(complaint);
         } catch (Exception e) {
@@ -580,7 +586,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.CLOSED, complaint, currentTime, null);
+        updateStatusHistory(Status.CLOSED, complaint, currentTime, null,null);
 
         complaint.setClosedAt(currentTime);
 
@@ -599,4 +605,38 @@ public class ComplaintService {
 
         return response;
     }
+
+    @Transactional
+    public ComplaintRejectionResponse rejectWorkDoneByCitizen(int complaintId, ComplaintRejectionRequest complaintRejectionRequest) {
+        User user = fetchAuthenticatedUser();
+        Complaint complaint = getComplaintOrThrow(complaintId);
+
+        validateCitizen(user);
+        validateOwnership(complaint, user.getId());
+
+        if (complaint.getStatus() != Status.PENDING_VERIFICATION)
+            throw new ComplaintRejectionFailedException("Action denied: Complaint Rejection is only allowed when status is PENDING_VERIFICATION.");
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        updateStatusHistory(Status.REOPENED, complaint, currentTime, complaintRejectionRequest.getRemark(), complaintRejectionRequest.getContactDetails());
+
+        Complaint rejectedComplaint = complaintRepository.save(complaint);
+
+        ComplaintRejectionResponse response = new ComplaintRejectionResponse();
+        response.setComplaintId(rejectedComplaint.getId());
+        response.setSuccess(true);
+        response.setCitizenName(rejectedComplaint.getCreatedBy().getFullName());
+
+        if (rejectedComplaint.getAssignedTo() != null) {
+            response.setOfficerName(rejectedComplaint.getAssignedTo().getFullName());
+        }
+
+        response.setStatus(rejectedComplaint.getStatus());
+        response.setRejectedAt(rejectedComplaint.getLastUpdatedAt());
+        response.setMessage("Complaint rejected. Your feedback and contact details recorded.");
+
+        return response;
+    }
+
 }

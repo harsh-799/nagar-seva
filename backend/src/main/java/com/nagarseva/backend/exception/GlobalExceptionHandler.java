@@ -356,6 +356,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
+    @ExceptionHandler(ComplaintRejectionFailedException.class)
+    public ResponseEntity<ErrorResponse> handleComplaintRejectiomFailed(ComplaintRejectionFailedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
 
 
 
