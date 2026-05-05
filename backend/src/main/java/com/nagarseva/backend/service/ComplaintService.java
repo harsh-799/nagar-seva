@@ -322,6 +322,9 @@ public class ComplaintService {
         List<ImageMeta> complaintImages = complaint.getImages();
         List<ImageResponse> imageResponses = new ArrayList<>();
 
+        if (complaintImages == null)
+            complaintImages = new ArrayList<>();
+
         for (ImageMeta img: complaintImages) {
             ImageResponse imgResp = new ImageResponse();
             imgResp.setUrl(img.getImageUrl());
@@ -331,30 +334,7 @@ public class ComplaintService {
 
         response.setImages(imageResponses);
 
-        List<String> completionWorkImages = new ArrayList<>();
-
-        Status status = complaint.getStatus();
-
-        if (status == Status.PENDING_VERIFICATION || status == Status.CLOSED || status == Status.AUTO_CLOSED) {
-            completionWorkImages = complaintImages
-                    .stream()
-                    .filter(img ->
-                            img.getImageType().equals(ImageType.AFTER))
-                    .map(ImageMeta::getImageUrl)
-                            .toList();
-
-            response.setAfterImages(completionWorkImages);
-
-            ComplaintStatusHistory history = complaint.getComplaintStatusHistory()
-                    .stream()
-                    .filter(type -> type.getStatus() == Status.PENDING_VERIFICATION)
-                    .max(Comparator.comparing(ComplaintStatusHistory::getChangedAt))
-                    .orElse(null);
-
-            if (history != null && history.getRemark() != null && !history.getRemark().isBlank())
-                response.setRemarks(history.getRemark());
-
-        }
+        addCompletionDetails(complaint, response, complaintImages);
 
         addReopenedDetails(complaint, response);
 
@@ -548,6 +528,7 @@ public class ComplaintService {
                 ImageMeta imgMeta = uploadFile(file);
                 imgMeta.setComplaint(complaint);
                 imgMeta.setImageType(ImageType.AFTER);
+                imgMeta.setCycleNumber(complaint.getCycleNumber());
                 completionImages.add(imgMeta);
             }
             currentComplaintImages.addAll(completionImages);
@@ -675,4 +656,25 @@ public class ComplaintService {
         return response;
     }
 
+    private void addCompletionDetails(Complaint complaint, ComplaintDetailsResponse response, List<ImageMeta> complaintImages) {
+        if (complaint.getStatus() == Status.PENDING_VERIFICATION || complaint.getStatus() == Status.CLOSED ||complaint.getStatus() == Status.AUTO_CLOSED) {
+            List<String> afterImageUrls = complaintImages
+                    .stream()
+                    .filter(img ->
+                            img.getImageType() == ImageType.AFTER)
+                    .map(ImageMeta::getImageUrl)
+                    .toList();
+
+            response.setAfterImages(afterImageUrls);
+
+            ComplaintStatusHistory history = complaint.getComplaintStatusHistory()
+                    .stream()
+                    .filter(type -> type.getStatus() == Status.PENDING_VERIFICATION)
+                    .max(Comparator.comparing(ComplaintStatusHistory::getChangedAt))
+                    .orElse(null);
+
+            if (history != null && history.getRemark() != null && !history.getRemark().isBlank())
+                response.setRemarks(history.getRemark());
+        }
+    }
 }
