@@ -517,9 +517,9 @@ public class ComplaintService {
         if (!complaint.getAssignedTo().getId().equals(officer.getId()))
             throw new OfficerMismatchException("Complaint is assigned to a different officer. You cannot initiate work on this complaint.");
 
-        if (complaint.getStatus() != Status.IN_PROGRESS) {
+        if (complaint.getStatus() != Status.IN_PROGRESS && complaint.getStatus() != Status.REOPENED) {
             throw new ComplaintStatusMismatchException(
-                    "Complaint must be IN_PROGRESS to mark as completed"
+                    "Complaint must be IN_PROGRESS or REOPENED to mark as completed"
             );
         }
 
@@ -542,6 +542,7 @@ public class ComplaintService {
         Complaint updatedComplaint = null;
         List<ImageMeta> completionImages = new ArrayList<>();
 
+        flowValidation.validateTransition(complaint.getStatus(), Status.PENDING_VERIFICATION);
         try {
             for (MultipartFile file: images) {
                 ImageMeta imgMeta = uploadFile(file);
