@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -280,7 +281,7 @@ public class ComplaintService {
         return response;
     }
 
-    public ComplaintDetailsResponse showComplaintsById(int complaintId) {
+    public ComplaintDetailsResponse showComplaintsById(int complaintId, boolean isOfficerView) {
         Complaint complaint = getComplaintOrThrow(complaintId);
 
         ComplaintDetailsResponse response = new ComplaintDetailsResponse();
@@ -334,7 +335,7 @@ public class ComplaintService {
 
         response.setImages(imageResponses);
 
-        addCompletionDetails(complaint, response, complaintImages);
+        addCompletionDetails(complaint, response, complaintImages, isOfficerView);
 
         addReopenedDetails(complaint, response);
 
@@ -470,6 +471,12 @@ public class ComplaintService {
 
         if (!complaint.getAssignedTo().getId().equals(officer.getId()))
             throw new OfficerMismatchException("Complaint is assigned to a different officer. You cannot initiate work on this complaint.");
+
+        if (complaint.getStatus() == Status.REOPENED) {
+            complaint.setCycleNumber(complaint.getCycleNumber() + 1);
+        } else if (complaint.getCycleNumber() == 0) {
+            complaint.setCycleNumber(1);
+        }
 
         LocalDateTime currentTime = LocalDateTime.now();
         updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime, null,null);
@@ -624,10 +631,10 @@ public class ComplaintService {
         return response;
     }
 
-    public ComplaintDetailsResponse addReopenedDetails(Complaint complaint, ComplaintDetailsResponse response) {
+    public void addReopenedDetails(Complaint complaint, ComplaintDetailsResponse response) {
 
         if (complaint.getStatus() != Status.REOPENED) {
-            return response;
+            return;
         }
 
         List<ComplaintStatusHistory> complaintStatusHistories = complaint.getComplaintStatusHistory();
@@ -653,17 +660,24 @@ public class ComplaintService {
 
              }
         }
-        return response;
     }
 
-    private void addCompletionDetails(Complaint complaint, ComplaintDetailsResponse response, List<ImageMeta> complaintImages) {
+    private void addCompletionDetails(Complaint complaint, ComplaintDetailsResponse response, List<ImageMeta> complaintImages, boolean isOfficerView) {
         if (complaint.getStatus() == Status.PENDING_VERIFICATION || complaint.getStatus() == Status.CLOSED ||complaint.getStatus() == Status.AUTO_CLOSED) {
-            List<String> afterImageUrls = complaintImages
+
+            Stream<ImageMeta> stream = complaintImages
                     .stream()
                     .filter(img ->
-                            img.getImageType() == ImageType.AFTER)
-                    .map(ImageMeta::getImageUrl)
-                    .toList();
+                            img.getImageType() == ImageType.AFTER);
+
+            if (!isOfficerView) {
+                int currentCycle = complaint.getCycleNumber();
+                stream = stream.filter(img ->
+                        img.getCycleNumber() == currentCycle);
+            }
+
+            List<String> afterImageUrls = stream.map(ImageMeta::getImageUrl)
+                            .toList();
 
             response.setAfterImages(afterImageUrls);
 

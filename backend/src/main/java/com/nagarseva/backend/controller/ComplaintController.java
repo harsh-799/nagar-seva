@@ -38,13 +38,13 @@ public class ComplaintController {
 
     @GetMapping("/citizen/complaint/{id}")
     public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaintsCitizen(@PathVariable(name = "id") int complaintId) {
-        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId);
+        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId, false);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
     @GetMapping("/admin/complaint/{id}")
     public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaintsAdmin(@PathVariable(name = "id") int complaintId) {
-        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId);
+        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId, false);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
@@ -80,7 +80,7 @@ public class ComplaintController {
 
     @GetMapping("/officer/complaint/{id}")
     public ResponseEntity<ComplaintDetailsResponse> showSpecificComplaintsOfficer(@PathVariable(name = "id") int complaintId) {
-        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId);
+        ComplaintDetailsResponse resp = complaintService.showComplaintsById(complaintId, true);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 

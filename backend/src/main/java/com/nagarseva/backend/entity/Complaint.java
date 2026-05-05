@@ -26,6 +26,8 @@ public class Complaint {
     private String title;
     private String description;
 
+    private Integer cycleNumber = 0;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 

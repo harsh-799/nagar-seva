@@ -22,4 +22,6 @@ public class ImageMeta {
 
     private String imageUrl;
     private String imagePublicId;
+
+    private Integer cycleNumber;
 }
