@@ -41,4 +41,14 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Integer> {
             @Param("ward") Integer wardId,
             @Param("issueStatus") Status issueStatus,
             Pageable pageable);
+
+    @Query("""
+            SELECT c FROM Complaint c
+            WHERE (:ward IS NULL OR c.ward.id = :ward)
+            AND (:issueStatus IS NULL OR c.status = :issueStatus)
+            """)
+    Page<Complaint> findAllComplaints(
+            @Param("ward") Integer wardId,
+            @Param("issueStatus") Status issueStatus,
+            Pageable pageable);
 }

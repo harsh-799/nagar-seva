@@ -121,5 +121,16 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
+    @GetMapping("/admin/complaints")
+    public ResponseEntity<ComplaintPageResponse> showAllComplaintsAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Integer wardId
+    ) {
+        ComplaintPageResponse resp = complaintService.getAllComplaintsForAdmin(page, size, status, wardId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 
 }

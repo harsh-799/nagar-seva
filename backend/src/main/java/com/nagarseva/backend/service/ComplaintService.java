@@ -71,6 +71,12 @@ public class ComplaintService {
         }
     }
 
+    private void validateAdmin(User user) {
+        if (!user.getRole().equals(Role.ADMIN)) {
+            throw new InvalidUserRoleException("Invalid User! Only Officer are allowed");
+        }
+    }
+
     private User fetchAuthenticatedUser() {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication()
@@ -690,5 +696,45 @@ public class ComplaintService {
             if (history != null && history.getRemark() != null && !history.getRemark().isBlank())
                 response.setRemarks(history.getRemark());
         }
+    }
+
+    public ComplaintPageResponse getAllComplaintsForAdmin(int page, int size, Status status, Integer wardId) {
+        User user = fetchAuthenticatedUser();
+
+        validateAdmin(user);
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Complaint> complaintsPage = complaintRepository.findAllComplaints(wardId, status, pageable);
+
+        List<Complaint> complaintList = complaintsPage.getContent();
+
+        List<ComplaintRecordResponse> complaintRecordResponsesList = new ArrayList<>();
+
+        for (Complaint complaint : complaintList) {
+            ComplaintRecordResponse complaintRecordResponse = new ComplaintRecordResponse();
+            complaintRecordResponse.setComplaintId(complaint.getId());
+            complaintRecordResponse.setTitle(complaint.getTitle());
+            complaintRecordResponse.setIssueType(complaint.getIssueType());
+            complaintRecordResponse.setIssueStatus(complaint.getStatus());
+            complaintRecordResponse.setCreatedAt(complaint.getCreatedAt());
+            complaintRecordResponse.setWardId(complaint.getWard().getId());
+            complaintRecordResponsesList.add(complaintRecordResponse);
+        }
+
+        ComplaintPageResponse response = new ComplaintPageResponse();
+        response.setSuccess(true);
+        response.setMessage("Complaints fetched successfully.");
+        response.setComplaints(complaintRecordResponsesList);
+        response.setPage(complaintsPage.getNumber());
+        response.setSize(complaintsPage.getSize());
+        response.setTotalElements(complaintsPage.getTotalElements());
+        response.setIsLast(complaintsPage.isLast());
+
+        return response;
     }
 }
