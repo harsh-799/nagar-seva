@@ -103,7 +103,7 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
-    @PutMapping("/citizen/complaints/{id}/accept")
+    @PutMapping("/citizen/complaint/{id}/accept")
     public ResponseEntity<ComplaintResolutionResponse> approveComplaintCompletionByCitizen(
             @PathVariable(name = "id") int complaintId
     ) {
@@ -111,7 +111,7 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
-    @PutMapping("/citizen/complaints/{id}/reject")
+    @PutMapping("/citizen/complaint/{id}/reject")
     public ResponseEntity<ComplaintRejectionResponse> rejectComplaintCompletionByCitizen(
             @PathVariable(name = "id") int complaintId,
             @Valid
@@ -147,6 +147,17 @@ public class ComplaintController {
         ComplaintDisapprovedResponse resp = complaintService.markComplaintDisapprovedByAdmin(complaintId);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
+
+    @PutMapping("/admin/complaint/{id}/assign")
+    public ResponseEntity<ComplaintAssignedResponse> assignOfficerToComplaintByAdmin(
+            @PathVariable(name = "id") int complaintId,
+            @RequestParam(name = "offId") int officerId
+    ) {
+        ComplaintAssignedResponse resp = complaintService.markComplaintAssignedToOfficer(complaintId, officerId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+
 
 
 }

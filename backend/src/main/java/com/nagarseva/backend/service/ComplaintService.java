@@ -778,6 +778,8 @@ public class ComplaintService {
 
         updateStatusHistory(Status.REJECTED, complaint, currentTime, null, null);
 
+        complaint.setClosedAt(currentTime);
+
         Complaint rejectedComplaint = complaintRepository.save(complaint);
 
         ComplaintDisapprovedResponse response = new ComplaintDisapprovedResponse();
@@ -788,5 +790,40 @@ public class ComplaintService {
         response.setRejectedAt(currentTime);
 
         return response;
+    }
+
+    public ComplaintAssignedResponse markComplaintAssignedToOfficer(int complaintId, int officerId) {
+        User admin = fetchAuthenticatedUser();
+        Complaint complaint = getComplaintOrThrow(complaintId);
+
+        validateAdmin(admin);
+
+        User officer = userRepository.findById(officerId).orElseThrow(
+                () -> new UserNotFoundException("No Officer Found with this Id")
+        );
+
+        validateOfficer(officer);
+
+        if (complaint.getStatus() != Status.APPROVED) {
+            throw new ComplaintAssignmentFailedException("Only approved complaints can be assigned to officers.");
+        }
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        updateStatusHistory(Status.ASSIGNED, complaint, currentTime, null, null);
+
+        complaint.setAssignedTo(officer);
+
+        Complaint assignedComplaint = complaintRepository.save(complaint);
+
+        ComplaintAssignedResponse response = new ComplaintAssignedResponse();
+        response.setSuccess(true);
+        response.setMessage("Officer assigned successfully");
+        response.setOfficerId(assignedComplaint.getAssignedTo().getId());
+        response.setOfficerName(assignedComplaint.getAssignedTo().getFullName());
+        response.setComplaintId(assignedComplaint.getId());
+
+        return response;
+
     }
 }
