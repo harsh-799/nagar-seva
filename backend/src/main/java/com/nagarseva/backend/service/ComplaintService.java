@@ -763,4 +763,30 @@ public class ComplaintService {
 
         return response;
     }
+
+    public ComplaintDisapprovedResponse markComplaintDisapprovedByAdmin(int complaintId) {
+        Complaint complaint = getComplaintOrThrow(complaintId);
+        User user = fetchAuthenticatedUser();
+
+        validateAdmin(user);
+
+        if (complaint.getStatus() != Status.CREATED) {
+            throw new ComplaintAlreadyVerifiedException("Complaint is no longer eligible for admin rejection.");
+        }
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        updateStatusHistory(Status.REJECTED, complaint, currentTime, null, null);
+
+        Complaint rejectedComplaint = complaintRepository.save(complaint);
+
+        ComplaintDisapprovedResponse response = new ComplaintDisapprovedResponse();
+        response.setComplaintId(rejectedComplaint.getId());
+        response.setSuccess(true);
+        response.setMessage("Complaint disapproved Successfully.");
+        response.setStatus(Status.REJECTED);
+        response.setRejectedAt(currentTime);
+
+        return response;
+    }
 }
