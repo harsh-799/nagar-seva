@@ -4,19 +4,16 @@ import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.InvalidPasswordException;
-import com.nagarseva.backend.exception.InvalidUserCreation;
+import com.nagarseva.backend.exception.InvalidUserCreationException;
 import com.nagarseva.backend.exception.MissingDepartmentException;
-import com.nagarseva.backend.exception.UsernameAlreadyTaken;
+import com.nagarseva.backend.exception.UsernameAlreadyTakenException;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.EnumSet;
 
 @Service
 @AllArgsConstructor
@@ -58,11 +55,11 @@ public class UserService {
 
     public RegisterUserResponse addNewUser(RegisterUserRequest registerUserRequest) {
         if (userRepository.existsByUsername(registerUserRequest.getUsername())) {
-            throw new UsernameAlreadyTaken("Username Already Taken.");
+            throw new UsernameAlreadyTakenException("Username Already Taken.");
         }
 
         if (registerUserRequest.getRole().equals(Role.CITIZEN)) {
-            throw new InvalidUserCreation("Action not allowed: Admins are not permitted to create Citizen accounts");
+            throw new InvalidUserCreationException("Action not allowed: Admins are not permitted to create Citizen accounts");
         }
 
         User user = new User();

@@ -1,7 +1,6 @@
 package com.nagarseva.backend.exception;
 
 import com.nagarseva.backend.dto.ErrorResponse;
-import com.nagarseva.backend.dto.LoginUserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -38,8 +37,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
-    @ExceptionHandler(UsernameAlreadyTaken.class)
-    public ResponseEntity<ErrorResponse> handleUsernameAlreadyTaken(UsernameAlreadyTaken ex) {
+    @ExceptionHandler(UsernameAlreadyTakenException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyTaken(UsernameAlreadyTakenException ex) {
 
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
@@ -72,8 +71,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
-    @ExceptionHandler(InvalidUserCreation.class)
-    public ResponseEntity<ErrorResponse> handleInvalidUserCreation(InvalidUserCreation ex) {
+    @ExceptionHandler(InvalidUserCreationException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUserCreation(InvalidUserCreationException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage("Account Creation Failed");
@@ -141,8 +140,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(resp);
     }
 
-    @ExceptionHandler(InvalidWard.class)
-    public ResponseEntity<ErrorResponse> handleInvalidWard(InvalidWard ex) {
+    @ExceptionHandler(InvalidWardException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidWard(InvalidWardException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage("Account Creation Failed");

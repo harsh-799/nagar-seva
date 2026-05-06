@@ -18,6 +18,8 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Integer> {
 
     List<Complaint> findByWard_Id(Integer wardId);
 
+    List<Complaint> findByStatus(Status status);
+
     @Query("""
             SELECT c FROM Complaint c
             WHERE c.createdBy.id = :userId

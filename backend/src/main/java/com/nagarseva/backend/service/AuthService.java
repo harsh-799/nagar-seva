@@ -7,8 +7,8 @@ import com.nagarseva.backend.dto.RegisterCitizenResponse;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
-import com.nagarseva.backend.exception.InvalidWard;
-import com.nagarseva.backend.exception.UsernameAlreadyTaken;
+import com.nagarseva.backend.exception.InvalidWardException;
+import com.nagarseva.backend.exception.UsernameAlreadyTakenException;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import lombok.AllArgsConstructor;
@@ -31,11 +31,11 @@ public class AuthService {
     public RegisterCitizenResponse createNewCitizenAccount(RegisterCitizenRequest registerCitizenRequest) {
 
         if (userRepository.existsByUsername(registerCitizenRequest.getUsername())) {
-            throw new UsernameAlreadyTaken("Username Already Taken.");
+            throw new UsernameAlreadyTakenException("Username Already Taken.");
         }
 
         Ward ward = wardRepository.findById(registerCitizenRequest.getWardId()).orElseThrow(
-                () -> new InvalidWard("Invalid wardId: ward does not exist.")
+                () -> new InvalidWardException("Invalid wardId: ward does not exist.")
         );
 
         User citizen = new User();

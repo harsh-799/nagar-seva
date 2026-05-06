@@ -25,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -129,7 +128,7 @@ public class ComplaintService {
 
         if (registerComplaintRequest.getWardId() != null) {
             ward = wardRepository.findById(registerComplaintRequest.getWardId()).orElseThrow(
-                    () -> new InvalidWard("Invalid WardId!")
+                    () -> new InvalidWardException("Invalid WardId!")
             );
         }
 
@@ -217,7 +216,7 @@ public class ComplaintService {
 
         if (updateComplaintRequest.getWardId() != null) {
             Ward updatedWard = wardRepository.findById(updateComplaintRequest.getWardId()).orElseThrow(
-                    () -> new InvalidWard("Invalid WardId! No ward exists with this Id.")
+                    () -> new InvalidWardException("Invalid WardId! No ward exists with this Id.")
             );
 
             complaint.setWard(updatedWard);
