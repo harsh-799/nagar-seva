@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -825,5 +826,30 @@ public class ComplaintService {
 
         return response;
 
+    }
+
+    @Scheduled(initialDelay = 5000, fixedDelay = 3600000)
+    public void markComplaintAsAutoCompleted() {
+        List<Complaint> pendingVerificationComplaints = complaintRepository.findByStatus(Status.PENDING_VERIFICATION);
+
+        if (pendingVerificationComplaints == null || pendingVerificationComplaints.isEmpty()) {
+            return;
+        }
+
+        for (Complaint complaint : pendingVerificationComplaints) {
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            LocalDateTime lastUpdatedTime = complaint.getLastUpdatedAt();
+
+            // Though we always have this field but still better to check for NPE
+            if (lastUpdatedTime == null) continue;
+
+            LocalDateTime maxAcceptWindowTime = lastUpdatedTime.plusDays(3);
+
+            if (currentDateTime.isAfter(maxAcceptWindowTime)) {
+                updateStatusHistory(Status.AUTO_CLOSED, complaint, currentDateTime, null, null);
+                complaint.setClosedAt(currentDateTime);
+                complaintRepository.save(complaint);
+            }
+        }
     }
 }
