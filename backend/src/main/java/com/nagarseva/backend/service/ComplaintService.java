@@ -737,4 +737,30 @@ public class ComplaintService {
 
         return response;
     }
+
+    public ComplaintApprovedResponse markComplaintApprovedByAdmin(int complaintId) {
+        Complaint complaint = getComplaintOrThrow(complaintId);
+        User user = fetchAuthenticatedUser();
+
+        validateAdmin(user);
+
+        if (complaint.getStatus() != Status.CREATED) {
+            throw new ComplaintAlreadyVerifiedException("Complaint is already verified by the admin");
+        }
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        updateStatusHistory(Status.APPROVED, complaint, currentTime, null, null);
+
+        Complaint approvedComplaint = complaintRepository.save(complaint);
+
+        ComplaintApprovedResponse response = new ComplaintApprovedResponse();
+        response.setSuccess(true);
+        response.setMessage("Complaint Approved Successfully.");
+        response.setComplaintId(approvedComplaint.getId());
+        response.setStatus(approvedComplaint.getStatus());
+        response.setApprovedAt(currentTime);
+
+        return response;
+    }
 }

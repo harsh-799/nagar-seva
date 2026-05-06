@@ -132,5 +132,13 @@ public class ComplaintController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
+    @PutMapping("admin/complaint/{id}/approve")
+    public ResponseEntity<ComplaintApprovedResponse> approveCitizenComplaintByAdmin(
+            @PathVariable(name = "id") int complaintId
+    ) {
+        ComplaintApprovedResponse resp = complaintService.markComplaintApprovedByAdmin(complaintId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 
 }
