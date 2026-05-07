@@ -11,6 +11,6 @@ import lombok.Setter;
 public class RegisterUserResponse {
     private Boolean success;
     private String message;
-    private String username;
+    private String email;
     private Role role;
 }

@@ -12,5 +12,4 @@ import lombok.Setter;
 public class RegisterCitizenResponse {
     private Boolean success;
     private String message;
-    private String username;
 }

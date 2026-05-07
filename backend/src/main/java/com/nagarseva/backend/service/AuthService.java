@@ -8,7 +8,7 @@ import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.InvalidWardException;
-import com.nagarseva.backend.exception.UsernameAlreadyTakenException;
+import com.nagarseva.backend.exception.UserAlreadyExistsException;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import lombok.AllArgsConstructor;
@@ -30,8 +30,8 @@ public class AuthService {
 
     public RegisterCitizenResponse createNewCitizenAccount(RegisterCitizenRequest registerCitizenRequest) {
 
-        if (userRepository.existsByUsername(registerCitizenRequest.getUsername())) {
-            throw new UsernameAlreadyTakenException("Username Already Taken.");
+        if (userRepository.existsByEmail(registerCitizenRequest.getEmail())) {
+            throw new UserAlreadyExistsException("Username already exists.");
         }
 
         Ward ward = wardRepository.findById(registerCitizenRequest.getWardId()).orElseThrow(
@@ -39,7 +39,7 @@ public class AuthService {
         );
 
         User citizen = new User();
-        citizen.setUsername(registerCitizenRequest.getUsername());
+        citizen.setEmail(registerCitizenRequest.getEmail());
         citizen.setPassword(passwordEncoder.encode(registerCitizenRequest.getPassword()));
         citizen.setFullName(registerCitizenRequest.getFullName());
         citizen.setRole(Role.CITIZEN);
@@ -50,7 +50,6 @@ public class AuthService {
 
         RegisterCitizenResponse response = new RegisterCitizenResponse();
         response.setSuccess(true);
-        response.setUsername(savedCitizen.getUsername());
         response.setMessage("Citizen Account Created Successfully.");
 
         return response;
@@ -59,7 +58,7 @@ public class AuthService {
     public LoginUserResponse authenticateUser(LoginUserRequest loginUserRequest) {
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
-                loginUserRequest.getUsername(),
+                loginUserRequest.getEmail(),
                 loginUserRequest.getPassword()
         );
 

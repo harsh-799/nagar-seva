@@ -13,8 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class DataInitializer {
 
-    @Value("${admin.username}")
-    private String adminUsername;
+    @Value("${admin.email}")
+    private String adminEmail;
 
     @Value("${admin.password}")
     private String adminPassword;
@@ -29,7 +29,7 @@ public class DataInitializer {
             if (!adminExists) {
                 System.out.println("Admin Not Found. Creating Admin..");
                 User user = new User();
-                user.setUsername(adminUsername);
+                user.setEmail(adminEmail);
                 user.setPassword(passwordEncoder.encode(adminPassword));
                 user.setRole(Role.ADMIN);
                 user.setActive(true);

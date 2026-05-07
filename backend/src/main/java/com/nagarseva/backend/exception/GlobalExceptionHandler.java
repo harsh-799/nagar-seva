@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
-    @ExceptionHandler(UsernameAlreadyTakenException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameAlreadyTaken(UsernameAlreadyTakenException ex) {
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyTaken(UserAlreadyExistsException ex) {
 
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
@@ -375,6 +375,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ComplaintAlreadyVerifiedException.class)
     public ResponseEntity<ErrorResponse> handleComplaintAlreadyVerified(ComplaintAlreadyVerifiedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintAssignmentFailedException.class)
+    public ResponseEntity<ErrorResponse> handleComplaintAssignmentFailed(ComplaintAssignmentFailedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintApprovalFailedException.class)
+    public ResponseEntity<ErrorResponse> handleComplaintApprovalFailed(ComplaintApprovalFailedException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage(ex.getMessage());

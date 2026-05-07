@@ -6,7 +6,7 @@ import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.InvalidPasswordException;
 import com.nagarseva.backend.exception.InvalidUserCreationException;
 import com.nagarseva.backend.exception.MissingDepartmentException;
-import com.nagarseva.backend.exception.UsernameAlreadyTakenException;
+import com.nagarseva.backend.exception.UserAlreadyExistsException;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class UserService {
                 .getAuthentication()
                 .getPrincipal();
 
-        User updatedUser = userRepository.findByUsername(user.getUsername()).orElseThrow(
+        User updatedUser = userRepository.findByEmail(user.getUsername()).orElseThrow(
                 () -> new UsernameNotFoundException("User Not Found")
         );
 
@@ -54,8 +54,8 @@ public class UserService {
     }
 
     public RegisterUserResponse addNewUser(RegisterUserRequest registerUserRequest) {
-        if (userRepository.existsByUsername(registerUserRequest.getUsername())) {
-            throw new UsernameAlreadyTakenException("Username Already Taken.");
+        if (userRepository.existsByEmail(registerUserRequest.getEmail())) {
+            throw new UserAlreadyExistsException("Username Already Taken.");
         }
 
         if (registerUserRequest.getRole().equals(Role.CITIZEN)) {
@@ -63,7 +63,7 @@ public class UserService {
         }
 
         User user = new User();
-        user.setUsername(registerUserRequest.getUsername());
+        user.setEmail(registerUserRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
         user.setFullName(registerUserRequest.getFullName());
         user.setRole(registerUserRequest.getRole());
@@ -81,7 +81,7 @@ public class UserService {
 
         RegisterUserResponse response = new RegisterUserResponse();
         response.setSuccess(true);
-        response.setUsername(savedUser.getUsername());
+        response.setEmail(savedUser.getEmail());
         response.setMessage("Account Created Successfully.");
         response.setRole(registerUserRequest.getRole());
 
