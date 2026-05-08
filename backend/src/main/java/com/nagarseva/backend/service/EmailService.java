@@ -1,5 +1,7 @@
 package com.nagarseva.backend.service;
 
+import com.nagarseva.backend.enums.IssueType;
+import com.nagarseva.backend.enums.Status;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
@@ -43,6 +45,37 @@ public class EmailService {
             helper.setText(htmlContent, true);
             javaMailSender.send(mimeMessage);
             System.out.println("done");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendComplaintApprovedEmail(String name, String email, Integer complaintId, IssueType issueType, Integer wardId, Status status) {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        try {
+            helper.setTo(email);
+            helper.setSubject("✅ Your Complaint Has Been Approved – Nagarseva");
+
+            ClassPathResource resource = new ClassPathResource("templates/approved.html");
+
+            String htmlContent = new String(
+                    resource.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            htmlContent = htmlContent.replace("{{name}}", name);
+            htmlContent = htmlContent.replace("{{complaintId}}",complaintId+"");
+            htmlContent = htmlContent.replace("{{issueType}}",issueType.name());
+            htmlContent = htmlContent.replace("{{wardNo}}",wardId+"");
+            htmlContent = htmlContent.replace("{{status}}",status.name());
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
             e.printStackTrace();
         } catch (IOException e) {

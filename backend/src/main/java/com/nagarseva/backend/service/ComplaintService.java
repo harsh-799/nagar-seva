@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class ComplaintService {
     private UserRepository userRepository;
     private FlowTransitionValidationService flowValidation;
     private ImageMetaRepository imageMetaRepository;
+    private EmailService emailService;
 
     private Complaint getComplaintOrThrow(int complaintId) {
         return complaintRepository.findById(complaintId).orElseThrow(
@@ -760,6 +762,8 @@ public class ComplaintService {
         response.setComplaintId(approvedComplaint.getId());
         response.setStatus(approvedComplaint.getStatus());
         response.setApprovedAt(currentTime);
+
+        emailService.sendComplaintApprovedEmail(approvedComplaint.getCreatedBy().getFullName(), approvedComplaint.getCreatedBy().getEmail(), approvedComplaint.getId(), approvedComplaint.getIssueType(), approvedComplaint.getWard().getId(), approvedComplaint.getStatus());
 
         return response;
     }
