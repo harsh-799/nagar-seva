@@ -27,6 +27,7 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
     private WardRepository wardRepository;
+    private EmailService emailService;
 
     public RegisterCitizenResponse createNewCitizenAccount(RegisterCitizenRequest registerCitizenRequest) {
 
@@ -47,6 +48,8 @@ public class AuthService {
         citizen.setActive(true);
 
         User savedCitizen = userRepository.save(citizen);
+
+        emailService.sendRegistrationSuccessEmail(savedCitizen.getFullName(), savedCitizen.getEmail());
 
         RegisterCitizenResponse response = new RegisterCitizenResponse();
         response.setSuccess(true);
