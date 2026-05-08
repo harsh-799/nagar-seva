@@ -793,6 +793,7 @@ public class ComplaintService {
         response.setStatus(Status.REJECTED);
         response.setRejectedAt(currentTime);
 
+        emailService.sendComplaintDisapprovedEmail(rejectedComplaint.getCreatedBy().getFullName(), rejectedComplaint.getCreatedBy().getEmail(), rejectedComplaint.getId(), rejectedComplaint.getIssueType(), rejectedComplaint.getWard().getId(), rejectedComplaint.getStatus());
         return response;
     }
 

@@ -82,4 +82,35 @@ public class EmailService {
             e.printStackTrace();
         }
     }
+
+    @Async
+    public void sendComplaintDisapprovedEmail(String name, String email, Integer complaintId, IssueType issueType, Integer wardId, Status status) {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        try {
+            helper.setTo(email);
+            helper.setSubject("❌ Your Complaint Has Been Rejected – Nagarseva");
+
+            ClassPathResource resource = new ClassPathResource("templates/rejected.html");
+
+            String htmlContent = new String(
+                    resource.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            htmlContent = htmlContent.replace("{{name}}", name);
+            htmlContent = htmlContent.replace("{{complaintId}}",complaintId+"");
+            htmlContent = htmlContent.replace("{{issueType}}",issueType.name());
+            htmlContent = htmlContent.replace("{{wardNo}}",wardId+"");
+            htmlContent = htmlContent.replace("{{status}}",status.name());
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
