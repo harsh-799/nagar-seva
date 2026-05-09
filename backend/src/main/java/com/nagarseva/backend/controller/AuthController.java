@@ -39,4 +39,10 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
+    @PostMapping("/verify-otp")
+    public ResponseEntity<OTPGeneratedResponse> validateOTPAndResetPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        OTPGeneratedResponse resp = authService.validateOTP(forgotPasswordRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 }

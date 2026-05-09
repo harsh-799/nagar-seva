@@ -40,6 +40,7 @@ public class User {
 
     private String resetOtp;
     private LocalDateTime resetOtpExpiry;
+    private LocalDateTime resetOtpVerifiedUntil;
 
     @OneToMany(mappedBy = "createdBy")
     private List<Complaint> createdComplaints;

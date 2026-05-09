@@ -4,10 +4,7 @@ import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
-import com.nagarseva.backend.exception.InvalidWardException;
-import com.nagarseva.backend.exception.OTPRequestTooFrequentException;
-import com.nagarseva.backend.exception.UserAlreadyExistsException;
-import com.nagarseva.backend.exception.UserNotFoundException;
+import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import lombok.AllArgsConstructor;
@@ -114,6 +111,36 @@ public class AuthService {
         response.setMessage("OTP Generated successfully");
 
         emailService.sendOTPGenerationEmail(savedUser.getResetOtp(),savedUser.getEmail());
+
+        return response;
+    }
+
+    public OTPGeneratedResponse validateOTP(ForgotPasswordRequest forgotPasswordRequest) {
+        User user = userRepository.findByEmail(forgotPasswordRequest.getEmail()).orElseThrow(
+                () -> new UserNotFoundException("No User Found with this email")
+        );
+
+        if (user.getResetOtpExpiry() == null) {
+            throw new OTPNotGeneratedException("No OTP has been generated. Please generate one first.");
+        }
+
+        if (!user.getResetOtp().equals(forgotPasswordRequest.getOtp())) {
+            throw new OTPInvalidException("OTP is invalid");
+        }
+
+        LocalDateTime current = LocalDateTime.now();
+
+        if (current.isAfter(user.getResetOtpExpiry())) {
+            throw new OTPExpiredException("OTP is Expired");
+        }
+
+        user.setResetOtpVerifiedUntil(LocalDateTime.now().plusMinutes(5));
+
+        userRepository.save(user);
+
+        OTPGeneratedResponse response = new OTPGeneratedResponse();
+        response.setSuccess(true);
+        response.setMessage("OTP validated successfully. You can change your password within 5 minutes.");
 
         return response;
     }

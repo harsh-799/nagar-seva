@@ -419,6 +419,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
+    @ExceptionHandler(OTPInvalidException.class)
+    public ResponseEntity<ErrorResponse> handleOTPInvalid(OTPInvalidException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage().substring(15));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(OTPExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleOTPInvalid(OTPExpiredException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage().substring(15));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
 
 
 
