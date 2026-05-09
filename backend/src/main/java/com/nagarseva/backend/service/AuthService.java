@@ -133,7 +133,8 @@ public class AuthService {
         if (current.isAfter(user.getResetOtpExpiry())) {
             throw new OTPExpiredException("OTP is Expired");
         }
-
+        user.setResetOtp(null);
+        user.setResetOtpExpiry(null);
         user.setResetOtpVerifiedUntil(LocalDateTime.now().plusMinutes(5));
 
         userRepository.save(user);
