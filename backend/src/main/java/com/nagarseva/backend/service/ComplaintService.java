@@ -98,6 +98,7 @@ public class ComplaintService {
         if (complaintStatusHistories == null)
             complaintStatusHistories = new ArrayList<>();
 
+        System.out.println(complaintStatusHistories);
         ComplaintStatusHistory complaintStatus = new ComplaintStatusHistory();
         complaintStatus.setComplaint(complaint);
         complaintStatus.setStatus(status);
@@ -834,7 +835,8 @@ public class ComplaintService {
 
     }
 
-    @Scheduled(initialDelay = 5000, fixedDelay = 3600000)
+    @Scheduled(initialDelay = 5000, fixedDelay = 10000)
+    @Transactional
     public void markComplaintAsAutoCompleted() {
         List<Complaint> pendingVerificationComplaints = complaintRepository.findByStatus(Status.PENDING_VERIFICATION);
 
@@ -854,7 +856,8 @@ public class ComplaintService {
             if (currentDateTime.isAfter(maxAcceptWindowTime)) {
                 updateStatusHistory(Status.AUTO_CLOSED, complaint, currentDateTime, null, null);
                 complaint.setClosedAt(currentDateTime);
-                complaintRepository.save(complaint);
+                Complaint autoClosedComplaint = complaintRepository.save(complaint);
+                emailService.sendComplaintAutoClosedEmail(autoClosedComplaint.getCreatedBy().getFullName(), autoClosedComplaint.getCreatedBy().getEmail(), autoClosedComplaint.getId(), autoClosedComplaint.getIssueType(), autoClosedComplaint.getWard().getId(), autoClosedComplaint.getStatus());
             }
         }
     }
