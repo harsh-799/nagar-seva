@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class EmailService {
@@ -224,6 +226,38 @@ public class EmailService {
             );
 
             htmlContent = htmlContent.replace("{{otp}}",resetOtp);
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendPasswordChangedConfirmationEmail(String name, String email, LocalDateTime current) {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        try {
+            helper.setTo(email);
+            helper.setSubject("✅ Your Password Has Been Changed – NagarSeva\"");
+
+            ClassPathResource resource = new ClassPathResource("templates/passwordchanged.html");
+
+            String htmlContent = new String(
+                    resource.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            htmlContent = htmlContent.replace("{{name}}",name);
+            htmlContent = htmlContent.replace("{{changedDate}}",current.toLocalDate().toString());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+            htmlContent = htmlContent.replace("{{changedTime}}",current.toLocalTime().format(formatter));
 
             helper.setText(htmlContent, true);
             javaMailSender.send(mimeMessage);

@@ -1,9 +1,6 @@
 package com.nagarseva.backend.controller;
 
-import com.nagarseva.backend.dto.PasswordUpdationRequest;
-import com.nagarseva.backend.dto.PasswordUpdationResponse;
-import com.nagarseva.backend.dto.RegisterUserRequest;
-import com.nagarseva.backend.dto.RegisterUserResponse;
+import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -29,6 +26,12 @@ public class UserController {
     @PutMapping("/change-password")
     public ResponseEntity<PasswordUpdationResponse> updatePassword(@Valid @RequestBody PasswordUpdationRequest passwordUpdationRequest) {
         PasswordUpdationResponse resp =  userService.updateUserPassword(passwordUpdationRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<PasswordUpdationResponse> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
+        PasswordUpdationResponse resp = userService.resetUserPassword(passwordResetRequest);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 

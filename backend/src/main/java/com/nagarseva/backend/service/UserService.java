@@ -3,17 +3,18 @@ package com.nagarseva.backend.service;
 import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.enums.Role;
-import com.nagarseva.backend.exception.InvalidPasswordException;
-import com.nagarseva.backend.exception.InvalidUserCreationException;
-import com.nagarseva.backend.exception.MissingDepartmentException;
-import com.nagarseva.backend.exception.UserAlreadyExistsException;
+import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +22,7 @@ public class UserService {
 
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
+    private EmailService emailService;
 
     public PasswordUpdationResponse updateUserPassword(PasswordUpdationRequest passwordUpdationRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext()
@@ -85,6 +87,38 @@ public class UserService {
         response.setMessage("Account Created Successfully.");
         response.setRole(registerUserRequest.getRole());
 
+        return response;
+    }
+
+    @Transactional
+    public PasswordUpdationResponse resetUserPassword(PasswordResetRequest passwordResetRequest) {
+        User user = userRepository.findByEmail(passwordResetRequest.getEmail()).orElseThrow(
+                () -> new UserNotFoundException("No User Found with this email")
+        );
+
+        LocalDateTime current = LocalDateTime.now();
+
+        if (user.getResetOtpVerifiedUntil() == null) {
+            throw new OTPNotGeneratedException("No OTP has been generated. Please generate one first.");
+        }
+
+        if (current.isAfter(user.getResetOtpVerifiedUntil())) {
+            throw new ResetPasswordWindowExceededException("Password reset window exceeded. Please generate a new OTP");
+        }
+
+        user.setPassword(passwordEncoder.encode(passwordResetRequest.getNewPassword()));
+
+        user.setResetOtp(null);
+        user.setResetOtpExpiry(null);
+        user.setResetOtpVerifiedUntil(null);
+
+        User updatedUser = userRepository.save(user);
+
+        PasswordUpdationResponse response = new PasswordUpdationResponse();
+        response.setSuccess(true);
+        response.setMessage("Password changed successfully");
+
+        emailService.sendPasswordChangedConfirmationEmail(updatedUser.getFullName(), updatedUser.getEmail(), current);
         return response;
     }
 }

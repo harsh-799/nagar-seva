@@ -411,7 +411,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleOTPGenerationFailed(ConstraintViolationException ex) {
+    public ResponseEntity<ErrorResponse> handleInvalidEmailForResetPassword(ConstraintViolationException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage(ex.getMessage().substring(15));
@@ -423,16 +423,34 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOTPInvalid(OTPInvalidException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
-        resp.setMessage(ex.getMessage().substring(15));
+        resp.setMessage(ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
     @ExceptionHandler(OTPExpiredException.class)
-    public ResponseEntity<ErrorResponse> handleOTPInvalid(OTPExpiredException ex) {
+    public ResponseEntity<ErrorResponse> handleOTPExpired(OTPExpiredException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
-        resp.setMessage(ex.getMessage().substring(15));
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ResetPasswordWindowExceededException.class)
+    public ResponseEntity<ErrorResponse> handleResetPasswordWindowExceeded(ResetPasswordWindowExceededException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(OTPNotGeneratedException.class)
+    public ResponseEntity<ErrorResponse> handleOTPNotGenerated(OTPNotGeneratedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
