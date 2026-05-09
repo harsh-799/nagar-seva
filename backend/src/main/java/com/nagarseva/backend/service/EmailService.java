@@ -206,4 +206,31 @@ public class EmailService {
             e.printStackTrace();
         }
     }
+
+    @Async
+    public void sendOTPGenerationEmail(String resetOtp, String email) {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        try {
+            helper.setTo(email);
+            helper.setSubject("🔐 Password Reset Verification Code – NagarSeva");
+
+            ClassPathResource resource = new ClassPathResource("templates/forgotpassword.html");
+
+            String htmlContent = new String(
+                    resource.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            htmlContent = htmlContent.replace("{{otp}}",resetOtp);
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

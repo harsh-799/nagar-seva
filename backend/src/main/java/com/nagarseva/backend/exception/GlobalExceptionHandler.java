@@ -1,6 +1,7 @@
 package com.nagarseva.backend.exception;
 
 import com.nagarseva.backend.dto.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -396,6 +397,24 @@ public class GlobalExceptionHandler {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(OTPRequestTooFrequentException.class)
+    public ResponseEntity<ErrorResponse> handleOTPGenerationFailed(OTPRequestTooFrequentException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleOTPGenerationFailed(ConstraintViolationException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage().substring(15));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }

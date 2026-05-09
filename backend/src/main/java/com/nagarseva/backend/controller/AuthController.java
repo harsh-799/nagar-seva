@@ -1,20 +1,22 @@
 package com.nagarseva.backend.controller;
 
-import com.nagarseva.backend.dto.LoginUserRequest;
-import com.nagarseva.backend.dto.LoginUserResponse;
-import com.nagarseva.backend.dto.RegisterCitizenRequest;
-import com.nagarseva.backend.dto.RegisterCitizenResponse;
+import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.service.AuthService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
+@Validated
 public class AuthController {
 
     private AuthService authService;
@@ -29,6 +31,12 @@ public class AuthController {
     public ResponseEntity<LoginUserResponse> loginUser(@Valid @RequestBody LoginUserRequest loginUserRequest) {
         LoginUserResponse resp = authService.authenticateUser(loginUserRequest);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<OTPGeneratedResponse> forgotPassword(@RequestParam @NotBlank @Email String email) {
+        OTPGeneratedResponse resp = authService.generateOtpForForgotPassword(email);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
 }

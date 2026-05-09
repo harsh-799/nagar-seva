@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
@@ -35,6 +37,9 @@ public class User {
     private boolean isDefaultPassword;
 
     private String department;
+
+    private String resetOtp;
+    private LocalDateTime resetOtpExpiry;
 
     @OneToMany(mappedBy = "createdBy")
     private List<Complaint> createdComplaints;

@@ -1,14 +1,13 @@
 package com.nagarseva.backend.service;
 
-import com.nagarseva.backend.dto.LoginUserRequest;
-import com.nagarseva.backend.dto.LoginUserResponse;
-import com.nagarseva.backend.dto.RegisterCitizenRequest;
-import com.nagarseva.backend.dto.RegisterCitizenResponse;
+import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.InvalidWardException;
+import com.nagarseva.backend.exception.OTPRequestTooFrequentException;
 import com.nagarseva.backend.exception.UserAlreadyExistsException;
+import com.nagarseva.backend.exception.UserNotFoundException;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import lombok.AllArgsConstructor;
@@ -17,6 +16,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Random;
 
 @Service
 @AllArgsConstructor
@@ -82,4 +84,37 @@ public class AuthService {
 
     }
 
+    public OTPGeneratedResponse generateOtpForForgotPassword(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("No User Found with this email")
+        );
+
+        LocalDateTime lastOTPGenerated = user.getResetOtpExpiry();
+
+        if (lastOTPGenerated != null) {
+            LocalDateTime current = LocalDateTime.now();
+            LocalDateTime otpGeneratedAt = lastOTPGenerated.minusMinutes(10);
+            if (current.isBefore(otpGeneratedAt.plusSeconds(30))) {
+                throw new OTPRequestTooFrequentException("Too many OTP requests. Try again after 30 seconds.");
+            }
+        }
+
+        Random random = new Random();
+        String otp = String.valueOf(random.nextInt(100000,1000000));
+
+        LocalDateTime current = LocalDateTime.now();
+
+        user.setResetOtp(otp);
+        user.setResetOtpExpiry(current.plusMinutes(10));
+
+        User savedUser = userRepository.save(user);
+
+        OTPGeneratedResponse response = new OTPGeneratedResponse();
+        response.setSuccess(true);
+        response.setMessage("OTP Generated successfully");
+
+        emailService.sendOTPGenerationEmail(savedUser.getResetOtp(),savedUser.getEmail());
+
+        return response;
+    }
 }
