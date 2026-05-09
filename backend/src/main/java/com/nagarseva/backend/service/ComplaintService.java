@@ -98,7 +98,6 @@ public class ComplaintService {
         if (complaintStatusHistories == null)
             complaintStatusHistories = new ArrayList<>();
 
-        System.out.println(complaintStatusHistories);
         ComplaintStatusHistory complaintStatus = new ComplaintStatusHistory();
         complaintStatus.setComplaint(complaint);
         complaintStatus.setStatus(status);
@@ -639,6 +638,7 @@ public class ComplaintService {
         response.setRejectedAt(rejectedComplaint.getLastUpdatedAt());
         response.setMessage("Complaint rejected. Your feedback and contact details recorded.");
 
+        emailService.sendComplaintReopenedEmail(rejectedComplaint.getCreatedBy().getFullName(), rejectedComplaint.getCreatedBy().getEmail(), rejectedComplaint.getId(), rejectedComplaint.getIssueType(), rejectedComplaint.getWard().getId(), rejectedComplaint.getStatus());
         return response;
     }
 
