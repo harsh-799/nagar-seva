@@ -570,6 +570,8 @@ public class ComplaintService {
         response.setStatus(complaint.getStatus());
         response.setComplaintId(updatedComplaint.getId());
 
+        emailService.sendComplaintPendingVerificationEmail(updatedComplaint.getCreatedBy().getFullName(), updatedComplaint.getCreatedBy().getEmail(), updatedComplaint.getId(), updatedComplaint.getIssueType(), updatedComplaint.getWard().getId(), updatedComplaint.getStatus());
+
         return response;
     }
 
