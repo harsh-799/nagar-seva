@@ -20,7 +20,7 @@ public class Ward {
     private String wardName;
 
     @OneToOne
-    @JoinColumn(name = "councillor_id", unique = true, nullable = false)
+    @JoinColumn(name = "councillor_id", unique = true)
     private User councillor;
 
     @OneToMany(mappedBy = "ward")
