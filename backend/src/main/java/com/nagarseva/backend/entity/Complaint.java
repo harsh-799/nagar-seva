@@ -1,6 +1,7 @@
 package com.nagarseva.backend.entity;
 
 import com.nagarseva.backend.enums.IssueType;
+import com.nagarseva.backend.enums.Priority;
 import com.nagarseva.backend.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,9 @@ public class Complaint {
 
     @Enumerated(EnumType.STRING)
     private IssueType issueType;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
     private String title;
     private String description;

@@ -146,6 +146,7 @@ public class ComplaintService {
         Complaint raiseComplaint = new Complaint();
         raiseComplaint.setTitle(registerComplaintRequest.getTitle());
         raiseComplaint.setIssueType(registerComplaintRequest.getIssueType());
+        raiseComplaint.setPriority(registerComplaintRequest.getIssueType().getPriority());
         raiseComplaint.setDescription(registerComplaintRequest.getDesc());
         raiseComplaint.setWard(ward);
 
@@ -450,6 +451,7 @@ public class ComplaintService {
             complaintRecordResponse.setComplaintId(complaint.getId());
             complaintRecordResponse.setTitle(complaint.getTitle());
             complaintRecordResponse.setIssueType(complaint.getIssueType());
+            complaintRecordResponse.setPriority(complaint.getPriority());
             complaintRecordResponse.setIssueStatus(complaint.getStatus());
             complaintRecordResponse.setCreatedAt(complaint.getCreatedAt());
             complaintRecordResponse.setWardId(complaint.getWard().getId());
