@@ -39,14 +39,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameAlreadyTaken(UserAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyTaken(UserAlreadyExistsException ex) {
 
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage("Account cannot be created");
 
         Map<String, String> errors = new HashMap<>();
-        errors.put("username",ex.getMessage());
+        errors.put("email",ex.getMessage());
 
         resp.setErrors(errors);
 
@@ -448,6 +448,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OTPNotGeneratedException.class)
     public ResponseEntity<ErrorResponse> handleOTPNotGenerated(OTPNotGeneratedException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(MissingWardException.class)
+    public ResponseEntity<ErrorResponse> handleMissingWard(MissingWardException ex) {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage(ex.getMessage());

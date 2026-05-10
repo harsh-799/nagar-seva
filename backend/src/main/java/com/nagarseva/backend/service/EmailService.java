@@ -1,6 +1,7 @@
 package com.nagarseva.backend.service;
 
 import com.nagarseva.backend.enums.IssueType;
+import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -258,6 +259,42 @@ public class EmailService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
             htmlContent = htmlContent.replace("{{changedTime}}",current.toLocalTime().format(formatter));
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendOfficialRegistrationSuccessEmail(String name, String email, Role role, String password) {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        try {
+            helper.setTo(email);
+            helper.setSubject("✅ Welcome to NagarSeva – Your Account Is Ready");
+
+            ClassPathResource resource = new ClassPathResource("templates/registerbyadmin.html");
+
+            String htmlContent = new String(
+                    resource.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            htmlContent = htmlContent.replace("{{name}}",name);
+
+            String role1 = "";
+            if (role.equals(Role.COUNCILLOR)) role1 = "Ward " + role.name();
+            if (role.equals(Role.OFFICER)) role1 = "Municipal " + role.name();
+            if (role.equals(Role.ADMIN)) role1 = "Municipal Administrator";
+
+            htmlContent = htmlContent.replace("{{role}}", role1);
+            htmlContent = htmlContent.replace("{{email}}", email);
+            htmlContent = htmlContent.replace("{{tempPass}}", password);
 
             helper.setText(htmlContent, true);
             javaMailSender.send(mimeMessage);
