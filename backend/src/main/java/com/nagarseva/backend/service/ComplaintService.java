@@ -3,10 +3,7 @@ package com.nagarseva.backend.service;
 import com.cloudinary.Cloudinary;
 import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.*;
-import com.nagarseva.backend.enums.ImageType;
-import com.nagarseva.backend.enums.IssueType;
-import com.nagarseva.backend.enums.Role;
-import com.nagarseva.backend.enums.Status;
+import com.nagarseva.backend.enums.*;
 import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.ComplaintRepository;
 import com.nagarseva.backend.repository.ImageMetaRepository;
@@ -76,6 +73,12 @@ public class ComplaintService {
     private void validateAdmin(User user) {
         if (!user.getRole().equals(Role.ADMIN)) {
             throw new InvalidUserRoleException("Invalid User! Only Officer are allowed");
+        }
+    }
+
+    private void validateCouncillor(User user) {
+        if (!user.getRole().equals(Role.COUNCILLOR)) {
+            throw new InvalidUserRoleException("Invalid User! Only Ward Councillor are allowed");
         }
     }
 
@@ -833,6 +836,8 @@ public class ComplaintService {
         response.setOfficerName(assignedComplaint.getAssignedTo().getFullName());
         response.setComplaintId(assignedComplaint.getId());
 
+        emailService.sendComplaintAssignedEmail(assignedComplaint.getAssignedTo().getFullName(), assignedComplaint.getId(), assignedComplaint.getIssueType(), assignedComplaint.getWard().getId(), assignedComplaint.getPriority(), assignedComplaint.getLastUpdatedAt(), assignedComplaint.getAssignedTo().getEmail());
+
         return response;
 
     }
@@ -862,5 +867,41 @@ public class ComplaintService {
                 emailService.sendComplaintAutoClosedEmail(autoClosedComplaint.getCreatedBy().getFullName(), autoClosedComplaint.getCreatedBy().getEmail(), autoClosedComplaint.getId(), autoClosedComplaint.getIssueType(), autoClosedComplaint.getWard().getId(), autoClosedComplaint.getStatus());
             }
         }
+    }
+
+    public ComplaintPriorityResponse updateComplaintPriorityByCouncillor(int complaintId, Priority priority) {
+        User councillor = fetchAuthenticatedUser();
+
+        validateCouncillor(councillor);
+        Complaint complaint = getComplaintOrThrow(complaintId);
+
+        if (
+                complaint.getStatus() != Status.CREATED
+                && complaint.getStatus() != Status.APPROVED
+                && complaint.getStatus() != Status.ASSIGNED
+        ) {
+            throw new ComplaintPriorityChangeForbiddenException("Complaint priority cannot be changed once resolution is in progress or completed.");
+        }
+
+        if (complaint.getWard().getCouncillor().getId() != councillor.getId()) {
+            throw new UserMismatchException("Access violation: Cannot edit complaint priority for a different ward.");
+        }
+
+        Priority prevPriority = complaint.getPriority();
+
+        complaint.setPriority(priority);
+
+        complaint.setLastUpdatedAt(LocalDateTime.now());
+        Complaint updatedComplaint = complaintRepository.save(complaint);
+
+        ComplaintPriorityResponse response = new ComplaintPriorityResponse();
+        response.setSuccess(true);
+        response.setMessage("Complaint Priority changed");
+        response.setComplaintId(updatedComplaint.getId());
+        response.setPriority(updatedComplaint.getPriority());
+
+        emailService.sendComplaintPriorityUpdateEmail(updatedComplaint.getAssignedTo().getFullName(), updatedComplaint.getId(), updatedComplaint.getIssueType(), updatedComplaint.getWard().getId(), prevPriority, updatedComplaint.getPriority(), updatedComplaint.getLastUpdatedAt(), updatedComplaint.getAssignedTo().getEmail());
+
+        return response;
     }
 }

@@ -2,6 +2,7 @@ package com.nagarseva.backend.controller;
 
 import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.enums.IssueType;
+import com.nagarseva.backend.enums.Priority;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.service.ComplaintService;
 import com.nagarseva.backend.validation.ComplaintUpdateValidator;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
+@Validated
 public class ComplaintController {
 
     private ComplaintService complaintService;
@@ -153,6 +156,15 @@ public class ComplaintController {
             @RequestParam(name = "offId") int officerId
     ) {
         ComplaintAssignedResponse resp = complaintService.markComplaintAssignedToOfficer(complaintId, officerId);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+    @PutMapping("/councillor/complaint/{id}")
+    public ResponseEntity<ComplaintPriorityResponse> adjustComplaintPriorityByCouncillor(
+            @PathVariable(name = "id") int complaintId,
+            @RequestParam(name = "priority") Priority priority
+            ) {
+        ComplaintPriorityResponse resp = complaintService.updateComplaintPriorityByCouncillor(complaintId, priority);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 

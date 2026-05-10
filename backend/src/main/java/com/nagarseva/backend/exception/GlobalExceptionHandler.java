@@ -464,6 +464,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
     }
 
+    @ExceptionHandler(WardAlreadyAssignedToDifferentCouncillorException.class)
+    public ResponseEntity<ErrorResponse> handleWardAlreadyAssignedToDifferentCouncillor(WardAlreadyAssignedToDifferentCouncillorException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    @ExceptionHandler(ComplaintPriorityChangeForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleComplaintPriorityChangeForbidden(ComplaintPriorityChangeForbiddenException ex) {
+        ErrorResponse resp = new ErrorResponse();
+        resp.setSuccess(false);
+        resp.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
 
 
 

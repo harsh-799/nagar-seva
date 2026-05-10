@@ -2,9 +2,11 @@ package com.nagarseva.backend.service;
 
 import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
+import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.UserRepository;
+import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -23,6 +25,13 @@ public class UserService {
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     private EmailService emailService;
+    private WardRepository wardRepository;
+
+    private Ward getWardOrThrow(int wardId) {
+        return wardRepository.findById(wardId).orElseThrow(
+                () -> new InvalidWardException("No Ward Exists by this Id")
+        );
+    }
 
     public PasswordUpdationResponse updateUserPassword(PasswordUpdationRequest passwordUpdationRequest) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext()
@@ -86,6 +95,12 @@ public class UserService {
         response.setEmail(savedUser.getEmail());
         response.setMessage("Account Created Successfully.");
         response.setRole(registerUserRequest.getRole());
+
+        if (!passwordEncoder.matches(registerUserRequest.getPassword(), savedUser.getPassword())) {
+            throw new InvalidPasswordException("Password mismatch with Stored one");
+        }
+
+        emailService.sendOfficialRegistrationSuccessEmail(savedUser.getFullName(), savedUser.getEmail(), savedUser.getRole(), registerUserRequest.getPassword());
 
         return response;
     }

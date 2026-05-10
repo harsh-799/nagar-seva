@@ -1,6 +1,7 @@
 package com.nagarseva.backend.service;
 
 import com.nagarseva.backend.enums.IssueType;
+import com.nagarseva.backend.enums.Priority;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import jakarta.mail.MessagingException;
@@ -298,6 +299,85 @@ public class EmailService {
 
             helper.setText(htmlContent, true);
             javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendComplaintAssignedEmail(String name, Integer complaintId, IssueType issueType, Integer wardId, Priority priority, LocalDateTime lastUpdatedAt, String email) {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        try {
+            helper.setTo(email);
+            helper.setSubject("📌 New Complaint Assigned To You – NagarSeva");
+
+            ClassPathResource resource = new ClassPathResource("templates/assigned.html");
+
+            String htmlContent = new String(
+                    resource.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            htmlContent = htmlContent.replace("{{officerName}}",name);
+            htmlContent = htmlContent.replace("{{complaintId}}",complaintId+"");
+            htmlContent = htmlContent.replace("{{issueType}}",issueType.name());
+            htmlContent = htmlContent.replace("{{wardNo}}",wardId+"");
+            htmlContent = htmlContent.replace("{{priorityClass}}",priority.name().toLowerCase());
+            htmlContent = htmlContent.replace("{{priority}}",priority.name());
+            htmlContent = htmlContent.replace("{{date}}",lastUpdatedAt.toLocalDate().toString());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+            htmlContent = htmlContent.replace("{{time}}",lastUpdatedAt.format(formatter));
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+            System.out.println("okay");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendComplaintPriorityUpdateEmail(String name, Integer complaintId, IssueType issueType, Integer wardId, Priority prevPriority, Priority newPriority, LocalDateTime lastUpdatedAt, String email) {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        try {
+            helper.setTo(email);
+            helper.setSubject("⚠️ Complaint Priority Updated – NagarSeva");
+
+            ClassPathResource resource = new ClassPathResource("templates/priority.html");
+
+            String htmlContent = new String(
+                    resource.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            htmlContent = htmlContent.replace("{{officerName}}",name);
+            htmlContent = htmlContent.replace("{{complaintId}}",complaintId+"");
+            htmlContent = htmlContent.replace("{{issueType}}",issueType.name());
+            htmlContent = htmlContent.replace("{{wardNo}}",wardId+"");
+            htmlContent = htmlContent.replace(" {{prevPriority}}",prevPriority.name());
+            htmlContent = htmlContent.replace("{{prevPriorityClass}}",prevPriority.name().toLowerCase());
+            htmlContent = htmlContent.replace(" {{newPriority}}",newPriority.name());
+            htmlContent = htmlContent.replace("{{newPriorityClass}}",newPriority.name().toLowerCase());
+
+            htmlContent = htmlContent.replace("{{date}}",lastUpdatedAt.toLocalDate().toString());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+            htmlContent = htmlContent.replace("{{time}}",lastUpdatedAt.format(formatter));
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+            System.out.println("okay");
         } catch (MessagingException e) {
             e.printStackTrace();
         } catch (IOException e) {
