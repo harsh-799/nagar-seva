@@ -12,6 +12,4 @@ public class RegisterWardRequest {
     private Integer wardId;
     @NotBlank(message = "WardName is empty")
     private String wardName;
-    @NotNull(message = "WardCouncillor Id is empty")
-    private Integer councillorId;
 }

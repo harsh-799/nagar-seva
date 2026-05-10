@@ -5,13 +5,12 @@ import com.nagarseva.backend.dto.RegisterWardResponse;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
-import com.nagarseva.backend.exception.CouncillorAlreadyAssignedException;
-import com.nagarseva.backend.exception.UserNotFoundException;
-import com.nagarseva.backend.exception.WardAlreadyExistsException;
-import com.nagarseva.backend.exception.WardCouncillorRoleMismatchException;
+import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
+import com.nagarseva.backend.security.CustomUserDetails;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,25 +20,29 @@ public class WardService {
     private WardRepository wardRepository;
     private UserRepository userRepository;
 
+    private User fetchAuthenticatedUser() {
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return user.getUser();
+    }
+
     public RegisterWardResponse addNewWard(RegisterWardRequest registerWardRequest) {
 
-        User wardCouncillor = userRepository.findById(registerWardRequest.getCouncillorId()).orElseThrow(
-                () -> new UserNotFoundException("No WardCouncillor Exists with this Id")
-        );
+        if (wardRepository.existsById(registerWardRequest.getWardId())) {
+            throw new WardAlreadyExistsException("Ward already exists. Please use a unique ward name or ID.");
+        }
 
-        if (!wardCouncillor.getRole().equals(Role.COUNCILLOR))
-            throw new WardCouncillorRoleMismatchException("Invalid role: User must be a Ward Councillor");
+        User user = fetchAuthenticatedUser();
 
-        if (wardRepository.existsByWardName(registerWardRequest.getWardName()))
-            throw new WardAlreadyExistsException("Ward already exists with this name");
-
-        if (wardRepository.existsByCouncillor_Id(registerWardRequest.getCouncillorId()))
-            throw new CouncillorAlreadyAssignedException("Councillor is already assigned to another ward.");
+        if (user.getRole() != Role.ADMIN) {
+            throw new InvalidUserRoleException("Access denied: Only ADMIN users are authorized to assign wards.");
+        }
 
         Ward ward = new Ward();
         ward.setId(registerWardRequest.getWardId());
         ward.setWardName(registerWardRequest.getWardName());
-        ward.setCouncillor(wardCouncillor);
 
         Ward savedWard = wardRepository.save(ward);
 
