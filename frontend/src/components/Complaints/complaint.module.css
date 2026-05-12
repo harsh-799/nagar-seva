@@ -1,0 +1,35 @@
+.complaints_wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.complaints_header {
+  margin-bottom: 40px;
+}
+
+.complaints_title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #111827;
+  letter-spacing: -0.5px;
+}
+
+.complaints_subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.complaints_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .complaints_grid {
+    grid-template-columns: 1fr;
+  }
+}

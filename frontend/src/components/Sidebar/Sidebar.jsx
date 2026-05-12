@@ -8,7 +8,7 @@ const Sidebar = (props) => {
   return (
     <aside className={`${styles.sidebar} ${props.isOpen ? styles.open : ''}`}>
 
-        <SidebarMenu sidebarItems={props.sidebarItems}/>
+        <SidebarMenu sidebarItems={props.sidebarItems} activeSection={props.activeSection} setActiveSection={props.setActiveSection}/>
         <SidebarBottom />
 
     </aside>

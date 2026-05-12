@@ -1,7 +1,9 @@
 import React from 'react'
+import { useState } from "react";
 import styles from './SidebarStyle.module.css'
 
 const SidebarMenu = (props) => {
+
   return (
     <>
     <div className={styles.logo}>
@@ -11,7 +13,12 @@ const SidebarMenu = (props) => {
         <nav className={styles.menu}>
            
             {props.sidebarItems.map((item,idx) => (
-                <a key={idx} href="#" className={idx == 0 ? `${styles.menu_item} ${styles.active}` : `${styles.menu_item}`}>
+                <a key={idx} href="#" 
+                   className={item.title === props.activeSection ? `${styles.menu_item} ${styles.active}` : `${styles.menu_item}`}
+                   onClick={(e) => {
+                       e.preventDefault(); // prevent anchor default jumping
+                       props.setActiveSection(item.title);
+                   }}>
                 <div className={styles.item_left}>
                     <i className={`${item.icon} ${styles.icon}`}></i>
                     <span>{item.title}</span>
