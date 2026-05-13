@@ -21,7 +21,8 @@ const AdminDashboard = () => {
         },
         {
             icon : "ph ph-user",
-            title: "Officer"
+            title: "Officer Management",
+            subtitle : "Monitor officer workload, availability, and complaint resolution performance."
         },
         {
             icon : "ph ph-folder",
