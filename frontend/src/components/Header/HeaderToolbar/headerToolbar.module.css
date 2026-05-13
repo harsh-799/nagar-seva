@@ -84,3 +84,18 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(17, 24, 39, 0.2);
 }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .btn_create_officer {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .search_box, .filter_dropdown {
+    width: 100%;
+  }
+}
