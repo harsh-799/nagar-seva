@@ -3,6 +3,8 @@ import Sidebar from '../../components/Sidebar/Sidebar'
 import Header from '../../components/Header/Header'
 import Complaint from '../../components/Complaints/Complaint'
 import style from './admindashboard.module.css'
+import OfficerManagement from '../../components/Officer Management/OfficerManagement'
+import HeaderToolbar from '../../components/Header/HeaderToolbar/HeaderToolbar'
 
 const AdminDashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -39,7 +41,8 @@ const AdminDashboard = () => {
         subtitle : sidebarItems
                     .filter(val => val.title === activeSection)
                     .map(val => val.subtitle),
-        pfp: "https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg"
+        pfp: "https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg",
+        
     }
 
   return (
@@ -50,9 +53,14 @@ const AdminDashboard = () => {
         <main className={style.main_content}>
         <Header header={headerData.heading} subtitle={headerData.subtitle} pfp={headerData.pfp} onMenuClick={() => setIsSidebarOpen(true)} />
 
+        {activeSection === "Officer Management" && <HeaderToolbar />}
+
         <div className={style.content_area}>
         {activeSection === "Complaints" && 
         <Complaint />   }
+        
+        {activeSection === "Officer Management" &&
+        <OfficerManagement />}
         </div>
 
         </main>
