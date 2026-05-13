@@ -9,7 +9,7 @@ import HeaderToolbar from "../../components/Header/HeaderToolbar/HeaderToolbar";
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Dashboard");
-  const [ward, setWard] = useState(["1","2","3"])
+  const [ward, setWard] = useState(["1", "2", "3"]);
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
 
   const sidebarItems = [
@@ -32,7 +32,8 @@ const AdminDashboard = () => {
     {
       icon: "ph ph-folder",
       title: "Ward Management",
-      subtitle : "Manage ward-level operations and monitor civic activity across regions."
+      subtitle:
+        "Manage ward-level operations and monitor civic activity across regions.",
     },
     {
       icon: "ph ph-chart-line-up",
@@ -50,9 +51,9 @@ const AdminDashboard = () => {
 
   const toolBarData = [
     {
-        heading : "Dashboard",
-        placeholder : "",
-        filters : []
+      heading: "Dashboard",
+      placeholder: "",
+      filters: [],
     },
     {
       heading: "Officer Management",
@@ -90,9 +91,9 @@ const AdminDashboard = () => {
           ],
         },
         {
-            filterBy : "ward",
-            values : ward
-        }
+          filterBy: "ward",
+          values: ward,
+        },
       ],
     },
     {
@@ -115,21 +116,21 @@ const AdminDashboard = () => {
           ],
         },
         {
-            filterBy : "ward",
-            values : ward
-        }
+          filterBy: "ward",
+          values: ward,
+        },
       ],
     },
-     {
-        heading : "Logout",
-        placeholder : "",
-        filters : []
+    {
+      heading: "Logout",
+      placeholder: "",
+      filters: [],
     },
   ];
 
   const activeToolbar = toolBarData.find(
-   item => item.heading === activeSection
-)
+    (item) => item.heading === activeSection,
+  );
 
   return (
     <div className={style.app_container}>
@@ -152,10 +153,10 @@ const AdminDashboard = () => {
         />
 
         <HeaderToolbar
-            heading={activeToolbar.heading}
-            placeholder={activeToolbar.placeholder}
-            filters={activeToolbar.filters}
-          />
+          heading={activeToolbar.heading}
+          placeholder={activeToolbar.placeholder}
+          filters={activeToolbar.filters}
+        />
 
         <div className={style.content_area}>
           {activeSection === "Complaints" && <Complaint />}
