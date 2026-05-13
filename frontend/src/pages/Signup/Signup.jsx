@@ -18,7 +18,7 @@ const Signup = () => {
           <div className={styles.auth_card}>
               <div className={styles.auth_header}>
                   <div className={styles.logo}>
-                      <i className="ph ph-buildings"></i>
+                      <img src="https://res.cloudinary.com/dzexb7f3p/image/upload/v1778174553/Gemini_Generated_Image_dk0cs1dk0cs1dk0c_4_copy_ibfkmg.png" alt="NagarSeva Logo" className={styles.logo_img} />
                   </div>
                   <h2 className={styles.heading}>Create an account</h2>
                   <p className={styles.subtext}>Join NagarSeva to report and track civic issues</p>
