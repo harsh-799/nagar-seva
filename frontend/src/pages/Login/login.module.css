@@ -195,3 +195,37 @@
         padding: 32px 24px;
     }
 }
+
+.input_wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input_wrapper .input_field {
+    padding-right: 40px;
+}
+
+.toggle_icon {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.toggle_icon:hover {
+    color: #111827;
+}
+
+.icon_svg {
+    width: 20px;
+    height: 20px;
+}
+

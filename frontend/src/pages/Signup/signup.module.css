@@ -117,6 +117,48 @@
     box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.05);
 }
 
+.input_wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input_wrapper .input_field {
+    padding-right: 70px;
+}
+
+.validation_icon {
+    position: absolute;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.toggle_icon {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.toggle_icon:hover {
+    color: #111827;
+}
+
+.icon_svg {
+    width: 20px;
+    height: 20px;
+}
+
 .form_check {
     display: flex;
     align-items: center;
@@ -195,3 +237,27 @@
         padding: 32px 24px;
     }
 }
+
+.password_validation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.password_validation.valid {
+    color: #10b981;
+}
+
+.password_validation.invalid {
+    color: #6b7280;
+}
+
+.icon_small {
+    width: 16px;
+    height: 16px;
+}
+
