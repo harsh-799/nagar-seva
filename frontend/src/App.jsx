@@ -7,6 +7,7 @@ import Signup from './pages/Signup/Signup';
 import { Slide, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css'
+import OfficerDashboard from './pages/OfficerDashboard/OfficerDashboard';
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
     <Route path='/login' element={<Login />}></Route>
     <Route path='/signup' element={<Signup />}></Route>
     <Route path='/admin/dashboard' element={<AdminDashboard />}></Route>
+    <Route path='/officer/dashboard' element={<OfficerDashboard />}></Route>
    </Routes>
 
    <ToastContainer
