@@ -5,12 +5,15 @@ import Complaint from "../../components/Complaints/Complaint";
 import style from "./admindashboard.module.css";
 import OfficerManagement from "../../components/Officer Management/OfficerManagement";
 import HeaderToolbar from "../../components/Header/HeaderToolbar/HeaderToolbar";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Dashboard");
   const [ward, setWard] = useState([]);
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
+
+  const navigate = useNavigate();
 
   const sidebarItems = [
     {
@@ -147,13 +150,19 @@ const AdminDashboard = () => {
           })
   
           if (!response.ok) {
-              console.log("error")
+              
+            const errorData = await response.json();
+
+            if (errorData.code === "PASSWORD_UPDATE_REQUIRED") {
+              navigate("/change-password");
+              return;
+            }
           }
   
           const data = await response.json();
           setWard(data)
       } catch (err) {
-          console.log("error aa gaya")
+          console.log(err)
       }
       }
       fetchWard();

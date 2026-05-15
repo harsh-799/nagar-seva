@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage'
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import Login from './pages/Login/Login';
 import Signup from './pages/Signup/Signup';
+import UpdatePassword from './pages/UpdatePassword/UpdatePassword';
 import { Slide, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css'
@@ -17,6 +18,7 @@ function App() {
     <Route path='/' element={<LandingPage />}></Route>
     <Route path='/login' element={<Login />}></Route>
     <Route path='/signup' element={<Signup />}></Route>
+    <Route path='/change-password' element={<UpdatePassword />}></Route>
     <Route path='/admin/dashboard' element={<AdminDashboard />}></Route>
     <Route path='/officer/dashboard' element={<OfficerDashboard />}></Route>
    </Routes>
