@@ -84,6 +84,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String body = """
         {
             "success": false,
+            "code": "PASSWORD_UPDATE_REQUIRED",
             "message": "%s"
         }
         """.formatted(message);
