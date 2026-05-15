@@ -4,14 +4,18 @@ import Header from "../../components/Header/Header";
 import Complaint from "../../components/Complaints/Complaint";
 import style from "./admindashboard.module.css";
 import OfficerManagement from "../../components/Officer Management/OfficerManagement";
+import WardManagement from "../../components/Ward Management/WardManagement";
 import HeaderToolbar from "../../components/Header/HeaderToolbar/HeaderToolbar";
 import { Link, useNavigate } from "react-router-dom";
+import CreateWardModal from "../../components/CreateWardModal/CreateWardModal";
+import { toast } from "react-toastify";
 
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Dashboard");
   const [ward, setWard] = useState([]);
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
+  const [isCreateWardModalOpen, setIsCreateWardModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -112,21 +116,6 @@ const AdminDashboard = () => {
       buttonPlaceholder: "Ward",
       filters: [
         {
-          filterBy: "status",
-          values: [
-            "ALL",
-            "CREATED",
-            "APPROVED",
-            "ASSIGNED",
-            "IN_PROGRESS",
-            "PENDING_VERIFICATION",
-            "CLOSED",
-            "AUTO_CLOSED",
-            "REOPENED",
-            "REJECTED",
-          ],
-        },
-        {
           filterBy: "ward",
           values: [
             {
@@ -204,14 +193,23 @@ const AdminDashboard = () => {
           placeholder={activeToolbar.placeholder}
           filters={activeToolbar.filters}
           buttonPlaceholder={activeToolbar.buttonPlaceholder}
+          onCreateClick={() => {
+            if (activeSection === "Ward Management") setIsCreateWardModalOpen(true);
+            // else handle create officer, etc.
+          }}
         />
 
         <div className={style.content_area}>
           {activeSection === "Complaints" && <Complaint />}
-
           {activeSection === "Officer Management" && <OfficerManagement />}
+          {activeSection === "Ward Management" && <WardManagement />}
         </div>
       </main>
+
+      <CreateWardModal 
+        isOpen={isCreateWardModalOpen} 
+        onClose={() => setIsCreateWardModalOpen(false)} 
+      />
     </div>
   );
 };

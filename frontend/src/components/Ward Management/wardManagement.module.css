@@ -1,0 +1,11 @@
+.ward_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .ward_grid {
+    grid-template-columns: 1fr;
+  }
+}
