@@ -3,6 +3,7 @@ package com.nagarseva.backend.service;
 import com.nagarseva.backend.dto.RegisterWardRequest;
 import com.nagarseva.backend.dto.RegisterWardResponse;
 import com.nagarseva.backend.dto.WardCouncillorAssignResponse;
+import com.nagarseva.backend.dto.WardResponse;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
@@ -13,6 +14,8 @@ import com.nagarseva.backend.security.CustomUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -96,6 +99,25 @@ public class WardService {
         response.setMessage("Councillor added successfully");
         response.setWardId(savedWard.getId());
         response.setCouncillorName(savedWard.getCouncillor().getFullName());
+
+        return response;
+    }
+
+    public List<WardResponse> getWardDetails() {
+        List<Ward> allWardsList = wardRepository.findAll();
+
+        if (allWardsList.isEmpty()) {
+            System.out.println("No ward exists");
+        }
+
+        List<WardResponse> response = new ArrayList<>();
+
+        for (Ward ward : allWardsList) {
+            WardResponse wardResponse = new WardResponse();
+            wardResponse.setWardId(ward.getId());
+            wardResponse.setWardName(ward.getWardName());
+            response.add(wardResponse);
+        }
 
         return response;
     }
