@@ -1,15 +1,13 @@
 package com.nagarseva.backend.controller;
 
 import com.nagarseva.backend.dto.*;
+import com.nagarseva.backend.enums.Department;
 import com.nagarseva.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -32,6 +30,16 @@ public class UserController {
     @PutMapping("/reset-password")
     public ResponseEntity<PasswordUpdationResponse> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
         PasswordUpdationResponse resp = userService.resetUserPassword(passwordResetRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+    @GetMapping("/admin/officers")
+    public ResponseEntity<OfficerFetchResponse> showAllOfficerAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(required = false) Department department
+            ) {
+        OfficerFetchResponse resp = userService.getAllOfficer(page,size,department);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 

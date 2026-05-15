@@ -1,5 +1,6 @@
 package com.nagarseva.backend.dto;
 
+import com.nagarseva.backend.enums.Department;
 import com.nagarseva.backend.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -19,5 +20,5 @@ public class RegisterUserRequest {
     private String fullName;
     @NotNull(message = "Role is required")
     private Role role;
-    private String department;
+    private Department department;
 }

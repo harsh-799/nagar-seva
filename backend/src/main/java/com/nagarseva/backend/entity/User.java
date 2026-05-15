@@ -1,5 +1,6 @@
 package com.nagarseva.backend.entity;
 
+import com.nagarseva.backend.enums.Department;
 import com.nagarseva.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,7 +37,7 @@ public class User {
     private boolean active;
     private boolean isDefaultPassword;
 
-    private String department;
+    private Department department;
 
     private String resetOtp;
     private LocalDateTime resetOtpExpiry;
@@ -51,5 +52,8 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "ward_id")
     private Ward citizensWard;
+
+    @OneToMany(mappedBy = "solvedByOfficer")
+    private List<ComplaintStatusHistory> complaintHandledByOfficer;
 
 }

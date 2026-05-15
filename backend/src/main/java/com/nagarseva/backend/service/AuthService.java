@@ -35,7 +35,7 @@ public class AuthService {
         }
 
         Ward ward = wardRepository.findById(registerCitizenRequest.getWardId()).orElseThrow(
-                () -> new InvalidWardException("Invalid wardId: ward does not exist.")
+                () -> new InvalidWardException("Invalid ward Id")
         );
 
         User citizen = new User();
