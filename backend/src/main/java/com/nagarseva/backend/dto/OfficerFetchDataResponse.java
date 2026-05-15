@@ -1,5 +1,6 @@
 package com.nagarseva.backend.dto;
 
+import com.nagarseva.backend.enums.Department;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +9,7 @@ import lombok.Setter;
 public class OfficerFetchDataResponse {
     private Integer id;
     private String name;
-    private String department;
+    private Department department;
     private String profileImage;
     private Long activeComplaints;
     private Long resolvedComplaints;

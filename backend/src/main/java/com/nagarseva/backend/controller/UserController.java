@@ -1,6 +1,7 @@
 package com.nagarseva.backend.controller;
 
 import com.nagarseva.backend.dto.*;
+import com.nagarseva.backend.enums.Department;
 import com.nagarseva.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -36,8 +37,8 @@ public class UserController {
     public ResponseEntity<OfficerFetchResponse> showAllOfficerAdmin(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size,
-            @RequestParam(required = false) String department
-    ) {
+            @RequestParam(required = false) Department department
+            ) {
         OfficerFetchResponse resp = userService.getAllOfficer(page,size,department);
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }

@@ -3,6 +3,7 @@ package com.nagarseva.backend.service;
 import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
+import com.nagarseva.backend.enums.Department;
 import com.nagarseva.backend.enums.Role;
 import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.exception.*;
@@ -96,6 +97,10 @@ public class UserService {
             throw new InvalidUserCreationException("Action not allowed: Admins are not permitted to create Citizen accounts");
         }
 
+        if (registerUserRequest.getRole() == Role.OFFICER && registerUserRequest.getDepartment() == null) {
+            throw new MissingDepartmentException("Department field is required but missing");
+        }
+
         User user = new User();
         user.setEmail(registerUserRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
@@ -160,7 +165,7 @@ public class UserService {
         return response;
     }
 
-    public OfficerFetchResponse getAllOfficer(int page, int size, String department) {
+    public OfficerFetchResponse getAllOfficer(int page, int size, Department department) {
         User admin = fetchAuthenticatedUser();
 
         validateAdmin(admin);

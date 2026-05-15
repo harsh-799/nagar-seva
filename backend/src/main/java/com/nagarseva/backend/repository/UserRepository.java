@@ -1,6 +1,7 @@
 package com.nagarseva.backend.repository;
 
 import com.nagarseva.backend.entity.User;
+import com.nagarseva.backend.enums.Department;
 import com.nagarseva.backend.enums.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             AND (:department IS NULL OR u.department = :department)
             """)
     Page<User> findAllOfficers(
-            @Param("department") String department,
+            @Param("department") Department department,
             @Param("role") Role role,
             Pageable pageable
     );
