@@ -61,7 +61,7 @@ const AdminDashboard = () => {
     {
       heading: "Officer Management",
       placeholder: "Search officers...",
-      buttonPlaceholder : "Officer",
+      buttonPlaceholder: "Officer",
       filters: [
         {
           filterBy: "department",
@@ -96,14 +96,20 @@ const AdminDashboard = () => {
         },
         {
           filterBy: "ward",
-          values: ward,
+          values: [
+            {
+              wardId: "ALL",
+              wardName: "ALL WARDS",
+            },
+            ...ward,
+          ],
         },
       ],
     },
     {
       heading: "Ward Management",
       placeholder: "Search wards....",
-      buttonPlaceholder : "Ward",
+      buttonPlaceholder: "Ward",
       filters: [
         {
           filterBy: "status",
@@ -122,7 +128,13 @@ const AdminDashboard = () => {
         },
         {
           filterBy: "ward",
-          values: ward,
+          values: [
+            {
+              wardId: "ALL",
+              wardName: "ALL WARDS",
+            },
+            ...ward,
+          ],
         },
       ],
     },
@@ -138,35 +150,34 @@ const AdminDashboard = () => {
   );
 
   useEffect(() => {
-      const fetchWard = async () => {
-        // console.log("hi")
-        try {
-          const response = await fetch("http://localhost:8080/admin/wards",{
-              method : "GET",
-              headers : {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("token")}`
-              }
-          })
-  
-          if (!response.ok) {
-              
-            const errorData = await response.json();
+    const fetchWard = async () => {
+      // console.log("hi")
+      try {
+        const response = await fetch("http://localhost:8080/admin/wards", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-            if (errorData.code === "PASSWORD_UPDATE_REQUIRED") {
-              navigate("/change-password");
-              return;
-            }
+        if (!response.ok) {
+          const errorData = await response.json();
+
+          if (errorData.code === "PASSWORD_UPDATE_REQUIRED") {
+            navigate("/change-password");
+            return;
           }
-  
-          const data = await response.json();
-          setWard(data)
+        }
+
+        const data = await response.json();
+        setWard(data);
       } catch (err) {
-          console.log(err)
+        console.log(err);
       }
-      }
-      fetchWard();
-    },[])
+    };
+    fetchWard();
+  }, []);
 
   return (
     <div className={style.app_container}>

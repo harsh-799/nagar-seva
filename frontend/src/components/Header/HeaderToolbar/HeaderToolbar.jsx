@@ -17,7 +17,12 @@ const HeaderToolbar = ({ heading, placeholder, buttonPlaceholder, filters }) => 
       {filters.map((filter, idx) => (
         <select key={idx} className={styles.filter_dropdown}>
           {filter.values.map((value, valueIdx) => (
-            <option key={valueIdx}>{filter.filterBy === "ward" ? `Ward ${value.wardId}` : value}</option>
+            <option key={valueIdx}>
+              {filter.filterBy === "ward"
+               ? value.wardId === "ALL"
+               ? "All Wards"
+               :`Ward ${value.wardId}`
+              : value}</option>
           ))}
         </select>
       ))}
