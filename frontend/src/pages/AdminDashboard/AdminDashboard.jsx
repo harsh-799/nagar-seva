@@ -9,7 +9,7 @@ import HeaderToolbar from "../../components/Header/HeaderToolbar/HeaderToolbar";
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Dashboard");
-  const [ward, setWard] = useState(["1", "2", "3"]);
+  const [ward, setWard] = useState([]);
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
 
   const sidebarItems = [
@@ -131,6 +131,31 @@ const AdminDashboard = () => {
   const activeToolbar = toolBarData.find(
     (item) => item.heading === activeSection,
   );
+
+  useEffect(() => {
+      const fetchWard = async () => {
+        // console.log("hi")
+        try {
+          const response = await fetch("http://localhost:8080/admin/wards",{
+              method : "GET",
+              headers : {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`
+              }
+          })
+  
+          if (!response.ok) {
+              console.log("error")
+          }
+  
+          const data = await response.json();
+          setWard(data)
+      } catch (err) {
+          console.log("error aa gaya")
+      }
+      }
+      fetchWard();
+    },[])
 
   return (
     <div className={style.app_container}>

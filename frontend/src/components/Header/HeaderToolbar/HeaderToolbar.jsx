@@ -6,6 +6,7 @@ const HeaderToolbar = ({ heading, placeholder, filters }) => {
     if (heading === "Dashboard" || heading === "Logout") {
         return null;
     }
+
   return (
     <div className={styles.action_row}>
       <div className={styles.search_box}>
@@ -16,7 +17,7 @@ const HeaderToolbar = ({ heading, placeholder, filters }) => {
       {filters.map((filter, idx) => (
         <select key={idx} className={styles.filter_dropdown}>
           {filter.values.map((value, valueIdx) => (
-            <option key={valueIdx}>{filter.filterBy === "ward" ? `Ward ${value}` : value}</option>
+            <option key={valueIdx}>{filter.filterBy === "ward" ? `Ward ${value.wardId}` : value}</option>
           ))}
         </select>
       ))}
