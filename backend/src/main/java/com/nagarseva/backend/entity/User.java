@@ -52,4 +52,7 @@ public class User {
     @JoinColumn(name = "ward_id")
     private Ward citizensWard;
 
+    @OneToMany(mappedBy = "solvedByOfficer")
+    private List<ComplaintStatusHistory> complaintHandledByOfficer;
+
 }

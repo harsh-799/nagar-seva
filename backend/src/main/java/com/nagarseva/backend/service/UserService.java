@@ -4,19 +4,26 @@ import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.User;
 import com.nagarseva.backend.entity.Ward;
 import com.nagarseva.backend.enums.Role;
+import com.nagarseva.backend.enums.Status;
 import com.nagarseva.backend.exception.*;
 import com.nagarseva.backend.repository.UserRepository;
 import com.nagarseva.backend.repository.WardRepository;
 import com.nagarseva.backend.security.CustomUserDetails;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -26,11 +33,27 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     private EmailService emailService;
     private WardRepository wardRepository;
+    private ComplaintService complaintService;
 
     private Ward getWardOrThrow(int wardId) {
         return wardRepository.findById(wardId).orElseThrow(
                 () -> new InvalidWardException("No Ward Exists by this Id")
         );
+    }
+
+    private void validateAdmin(User user) {
+        if (!user.getRole().equals(Role.ADMIN)) {
+            throw new InvalidUserRoleException("Invalid User! Only Officer are allowed");
+        }
+    }
+
+    private User fetchAuthenticatedUser() {
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return user.getUser();
+
     }
 
     public PasswordUpdationResponse updateUserPassword(PasswordUpdationRequest passwordUpdationRequest) {
@@ -135,5 +158,46 @@ public class UserService {
 
         emailService.sendPasswordChangedConfirmationEmail(updatedUser.getFullName(), updatedUser.getEmail(), current);
         return response;
+    }
+
+    public OfficerFetchResponse getAllOfficer(int page, int size, String department) {
+        User admin = fetchAuthenticatedUser();
+
+        validateAdmin(admin);
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("id").ascending()
+        );
+
+        Page<User> officerPage = userRepository.findAllOfficers(department, Role.OFFICER, pageable);
+        List<User> officerList = officerPage.getContent();
+
+        List<OfficerFetchDataResponse> officerFetchDataResponsesList = new ArrayList<>();
+
+        for (User officer: officerList) {
+            OfficerFetchDataResponse officerFetchDataResponse = new OfficerFetchDataResponse();
+            officerFetchDataResponse.setId(officer.getId());
+            officerFetchDataResponse.setName(officer.getFullName());
+            officerFetchDataResponse.setDepartment(officer.getDepartment());
+            officerFetchDataResponse.setProfileImage("/home");
+            Map<String, Long> map =complaintService.getComplaintsByOfficerAndStatus(officer.getId());
+            officerFetchDataResponse.setActiveComplaints(map.get("active"));
+            officerFetchDataResponse.setPendingComplaints(map.get("pending"));
+            officerFetchDataResponse.setResolvedComplaints(map.get("resolved"));
+            officerFetchDataResponsesList.add(officerFetchDataResponse);
+        }
+
+        OfficerFetchResponse officerFetchResponse = new OfficerFetchResponse();
+        officerFetchResponse.setSuccess(true);
+        officerFetchResponse.setMessage("Officer fetched successfully");
+        officerFetchResponse.setSize(officerPage.getSize());
+        officerFetchResponse.setPage(officerPage.getNumber());
+        officerFetchResponse.setTotalElements(officerPage.getTotalElements());
+        officerFetchResponse.setIsLast(officerPage.isLast());
+        officerFetchResponse.setOfficers(officerFetchDataResponsesList);
+
+        return officerFetchResponse;
     }
 }

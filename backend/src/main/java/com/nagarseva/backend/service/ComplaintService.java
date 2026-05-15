@@ -5,10 +5,7 @@ import com.nagarseva.backend.dto.*;
 import com.nagarseva.backend.entity.*;
 import com.nagarseva.backend.enums.*;
 import com.nagarseva.backend.exception.*;
-import com.nagarseva.backend.repository.ComplaintRepository;
-import com.nagarseva.backend.repository.ImageMetaRepository;
-import com.nagarseva.backend.repository.UserRepository;
-import com.nagarseva.backend.repository.WardRepository;
+import com.nagarseva.backend.repository.*;
 import com.nagarseva.backend.security.CustomUserDetails;
 import com.nagarseva.backend.validation.ImageValidator;
 import jakarta.transaction.Transactional;
@@ -41,6 +38,7 @@ public class ComplaintService {
     private FlowTransitionValidationService flowValidation;
     private ImageMetaRepository imageMetaRepository;
     private EmailService emailService;
+    private ComplaintStatusHistoryRepository complaintStatusHistoryRepository;
 
     private Complaint getComplaintOrThrow(int complaintId) {
         return complaintRepository.findById(complaintId).orElseThrow(
@@ -91,7 +89,7 @@ public class ComplaintService {
 
     }
 
-    private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime, String remark, String contactDetails) {
+    private void updateStatusHistory(Status status, Complaint complaint, LocalDateTime currentTime, String remark, String contactDetails, User officer) {
 
         if (complaint.getStatus() != null) {
             flowValidation.validateTransition(complaint.getStatus(), status);
@@ -114,6 +112,15 @@ public class ComplaintService {
 
         if (contactDetails != null && !contactDetails.isBlank() && status.equals(Status.REOPENED))
             complaintStatus.setContactDetails(contactDetails);
+
+        if (officer != null &&
+                (status == Status.ASSIGNED
+                || status == Status.IN_PROGRESS
+                || status == Status.PENDING_VERIFICATION
+                || status == Status.CLOSED
+                || status == Status.AUTO_CLOSED
+                ))
+            complaintStatus.setSolvedByOfficer(officer);
 
         complaintStatusHistories.add(complaintStatus);
 
@@ -155,7 +162,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.CREATED, raiseComplaint, currentTime,null,null);
+        updateStatusHistory(Status.CREATED, raiseComplaint, currentTime,null,null,null);
 
         raiseComplaint.setCreatedBy(user.getUser());
         raiseComplaint.setCreatedAt(currentTime);
@@ -492,7 +499,7 @@ public class ComplaintService {
         }
 
         LocalDateTime currentTime = LocalDateTime.now();
-        updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime, null,null);
+        updateStatusHistory(Status.IN_PROGRESS, complaint, currentTime, null,null,officer);
 
         Complaint updatedComplaint = complaintRepository.save(complaint);
 
@@ -552,7 +559,7 @@ public class ComplaintService {
                 completionImages.add(imgMeta);
             }
             currentComplaintImages.addAll(completionImages);
-            updateStatusHistory(Status.PENDING_VERIFICATION, complaint, currentTime, remark, null);
+            updateStatusHistory(Status.PENDING_VERIFICATION, complaint, currentTime, remark, null,officer);
             complaint.setImages(currentComplaintImages);
             updatedComplaint = complaintRepository.save(complaint);
         } catch (Exception e) {
@@ -593,7 +600,13 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.CLOSED, complaint, currentTime, null,null);
+        User officer = complaint.getAssignedTo();
+
+        if (officer == null) {
+            throw new ComplaintNotAssignedToOfficerException("Complaint cannot be marked as completed without being assigned to an officer");
+        }
+
+        updateStatusHistory(Status.CLOSED, complaint, currentTime, null,null,officer);
 
         complaint.setClosedAt(currentTime);
 
@@ -626,7 +639,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.REOPENED, complaint, currentTime, complaintRejectionRequest.getRemark(), complaintRejectionRequest.getContactDetails());
+        updateStatusHistory(Status.REOPENED, complaint, currentTime, complaintRejectionRequest.getRemark(), complaintRejectionRequest.getContactDetails(),null);
 
         Complaint rejectedComplaint = complaintRepository.save(complaint);
 
@@ -733,6 +746,7 @@ public class ComplaintService {
             complaintRecordResponse.setIssueStatus(complaint.getStatus());
             complaintRecordResponse.setCreatedAt(complaint.getCreatedAt());
             complaintRecordResponse.setWardId(complaint.getWard().getId());
+            complaintRecordResponse.setPriority(complaint.getPriority());
             complaintRecordResponsesList.add(complaintRecordResponse);
         }
 
@@ -760,7 +774,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.APPROVED, complaint, currentTime, null, null);
+        updateStatusHistory(Status.APPROVED, complaint, currentTime, null, null,null);
 
         Complaint approvedComplaint = complaintRepository.save(complaint);
 
@@ -788,7 +802,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.REJECTED, complaint, currentTime, null, null);
+        updateStatusHistory(Status.REJECTED, complaint, currentTime, null, null,null);
 
         complaint.setClosedAt(currentTime);
 
@@ -823,7 +837,7 @@ public class ComplaintService {
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        updateStatusHistory(Status.ASSIGNED, complaint, currentTime, null, null);
+        updateStatusHistory(Status.ASSIGNED, complaint, currentTime, null, null,officer);
 
         complaint.setAssignedTo(officer);
 
@@ -860,8 +874,15 @@ public class ComplaintService {
 
             LocalDateTime maxAcceptWindowTime = lastUpdatedTime.plusDays(3);
 
+            User assignedOfficer = complaint.getAssignedTo();
+
+            if (assignedOfficer == null) {
+                throw new ComplaintNotAssignedToOfficerException("Complaint cannot be marked as completed without being assigned to an officer");
+
+            }
+
             if (currentDateTime.isAfter(maxAcceptWindowTime)) {
-                updateStatusHistory(Status.AUTO_CLOSED, complaint, currentDateTime, null, null);
+                updateStatusHistory(Status.AUTO_CLOSED, complaint, currentDateTime, null, null,assignedOfficer);
                 complaint.setClosedAt(currentDateTime);
                 Complaint autoClosedComplaint = complaintRepository.save(complaint);
                 emailService.sendComplaintAutoClosedEmail(autoClosedComplaint.getCreatedBy().getFullName(), autoClosedComplaint.getCreatedBy().getEmail(), autoClosedComplaint.getId(), autoClosedComplaint.getIssueType(), autoClosedComplaint.getWard().getId(), autoClosedComplaint.getStatus());
@@ -904,4 +925,23 @@ public class ComplaintService {
 
         return response;
     }
+
+    public Map<String, Long> getComplaintsByOfficerAndStatus(int officerId) {
+        List<StatusCountDTO> statusCountDTOS = complaintStatusHistoryRepository.findAllComplaintsStatusOfOfficer(officerId);
+        Map<String, Long> statsMap = new HashMap<>();
+        for (StatusCountDTO stats: statusCountDTOS) {
+            if (stats.getStatus() == Status.IN_PROGRESS || stats.getStatus() == Status.PENDING_VERIFICATION)
+                statsMap.merge("active", stats.getCount(), Long::sum);
+
+            if (stats.getStatus() == Status.ASSIGNED)
+                statsMap.merge("pending", stats.getCount(), Long::sum);
+
+            if (stats.getStatus() == Status.CLOSED || stats.getStatus() == Status.AUTO_CLOSED)
+                statsMap.merge("resolved", stats.getCount(), Long::sum);
+        }
+
+        return statsMap;
+    }
+
+
 }

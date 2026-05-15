@@ -30,4 +30,8 @@ public class ComplaintStatusHistory {
     private String remark;
     private String contactDetails;
 
+    @ManyToOne
+    @JoinColumn(name = "officer_id")
+    private User solvedByOfficer;
+
 }
