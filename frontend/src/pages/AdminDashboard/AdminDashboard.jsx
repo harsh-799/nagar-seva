@@ -70,11 +70,12 @@ const AdminDashboard = () => {
         {
           filterBy: "department",
           values: [
-            "All Departments",
-            "Sanitation",
-            "Water Supply",
-            "Electricity",
-            "Infrastructure",
+            "SANITATION",
+            "WATER",
+            "ELECTRICITY",
+            "ROADS",
+            "DRAINAGE",
+            "OTHER",
           ],
         },
       ],
@@ -194,7 +195,8 @@ const AdminDashboard = () => {
           filters={activeToolbar.filters}
           buttonPlaceholder={activeToolbar.buttonPlaceholder}
           onCreateClick={() => {
-            if (activeSection === "Ward Management") setIsCreateWardModalOpen(true);
+            if (activeSection === "Ward Management")
+              setIsCreateWardModalOpen(true);
             // else handle create officer, etc.
           }}
         />
@@ -206,9 +208,9 @@ const AdminDashboard = () => {
         </div>
       </main>
 
-      <CreateWardModal 
-        isOpen={isCreateWardModalOpen} 
-        onClose={() => setIsCreateWardModalOpen(false)} 
+      <CreateWardModal
+        isOpen={isCreateWardModalOpen}
+        onClose={() => setIsCreateWardModalOpen(false)}
       />
     </div>
   );
