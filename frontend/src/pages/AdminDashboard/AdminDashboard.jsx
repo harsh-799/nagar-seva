@@ -58,6 +58,7 @@ const AdminDashboard = () => {
     {
       heading: "Officer Management",
       placeholder: "Search officers...",
+      buttonPlaceholder : "Officer",
       filters: [
         {
           filterBy: "department",
@@ -99,6 +100,7 @@ const AdminDashboard = () => {
     {
       heading: "Ward Management",
       placeholder: "Search wards....",
+      buttonPlaceholder : "Ward",
       filters: [
         {
           filterBy: "status",
@@ -181,6 +183,7 @@ const AdminDashboard = () => {
           heading={activeToolbar.heading}
           placeholder={activeToolbar.placeholder}
           filters={activeToolbar.filters}
+          buttonPlaceholder={activeToolbar.buttonPlaceholder}
         />
 
         <div className={style.content_area}>

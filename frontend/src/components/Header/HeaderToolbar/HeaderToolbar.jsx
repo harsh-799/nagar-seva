@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./headerToolbar.module.css";
 
-const HeaderToolbar = ({ heading, placeholder, filters }) => {
+const HeaderToolbar = ({ heading, placeholder, buttonPlaceholder, filters }) => {
 
     if (heading === "Dashboard" || heading === "Logout") {
         return null;
@@ -22,9 +22,11 @@ const HeaderToolbar = ({ heading, placeholder, filters }) => {
         </select>
       ))}
 
+      {(heading === "Officer Management" || heading === "Ward Management") && 
       <button className={styles.btn_create_officer}>
-        <i className="ph ph-plus-circle"></i> Create Officer
+        <i className="ph ph-plus-circle"></i> Create {buttonPlaceholder}
       </button>
+      }
     </div>
   );
 };
