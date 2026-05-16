@@ -27,7 +27,7 @@ const HeaderToolbar = ({ heading, placeholder, buttonPlaceholder, filters, onCre
         </select>
       ))}
 
-      {(heading === "Officer Management" || heading === "Ward Management") && 
+      {(heading === "Officer Management" || heading === "Ward Management" || heading === "My Complaints") && 
       <button className={styles.btn_create_officer} onClick={onCreateClick}>
         <i className="ph ph-plus-circle"></i> Create {buttonPlaceholder}
       </button>

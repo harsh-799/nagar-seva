@@ -9,6 +9,7 @@ import { Slide, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css'
 import OfficerDashboard from './pages/OfficerDashboard/OfficerDashboard';
+import CitizenDashboard from './pages/CitizenDashboard/CitizenDashboard';
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
     <Route path='/change-password' element={<UpdatePassword />}></Route>
     <Route path='/admin/dashboard' element={<AdminDashboard />}></Route>
     <Route path='/officer/dashboard' element={<OfficerDashboard />}></Route>
+    <Route path='/citizen/dashboard' element={<CitizenDashboard />}></Route>
    </Routes>
 
    <ToastContainer
