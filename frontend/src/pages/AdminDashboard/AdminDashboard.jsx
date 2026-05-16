@@ -8,6 +8,7 @@ import WardManagement from "../../components/Ward Management/WardManagement";
 import HeaderToolbar from "../../components/Header/HeaderToolbar/HeaderToolbar";
 import { Link, useNavigate } from "react-router-dom";
 import CreateWardModal from "../../components/CreateWardModal/CreateWardModal";
+import CreateOfficerModal from "../../components/CreateOfficerModal/CreateOfficerModal";
 import { toast } from "react-toastify";
 
 const AdminDashboard = () => {
@@ -16,6 +17,7 @@ const AdminDashboard = () => {
   const [ward, setWard] = useState([]);
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
   const [isCreateWardModalOpen, setIsCreateWardModalOpen] = useState(false);
+  const [isCreateOfficerModalOpen, setIsCreateOfficerModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -197,7 +199,8 @@ const AdminDashboard = () => {
           onCreateClick={() => {
             if (activeSection === "Ward Management")
               setIsCreateWardModalOpen(true);
-            // else handle create officer, etc.
+            if (activeSection === "Officer Management")
+              setIsCreateOfficerModalOpen(true);
           }}
         />
 
@@ -211,6 +214,11 @@ const AdminDashboard = () => {
       <CreateWardModal
         isOpen={isCreateWardModalOpen}
         onClose={() => setIsCreateWardModalOpen(false)}
+      />
+
+      <CreateOfficerModal
+        isOpen={isCreateOfficerModalOpen}
+        onClose={() => setIsCreateOfficerModalOpen(false)}
       />
     </div>
   );
