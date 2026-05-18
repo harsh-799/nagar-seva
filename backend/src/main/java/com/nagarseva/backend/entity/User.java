@@ -37,6 +37,7 @@ public class User {
     private boolean active;
     private boolean isDefaultPassword;
 
+    @Enumerated(EnumType.STRING)
     private Department department;
 
     private String resetOtp;

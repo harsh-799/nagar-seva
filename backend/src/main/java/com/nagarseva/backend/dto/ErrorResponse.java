@@ -15,5 +15,6 @@ import java.util.Map;
 public class ErrorResponse {
     private Boolean success;
     private String message;
+    private String code;
     private Map<String, String> errors;
 }

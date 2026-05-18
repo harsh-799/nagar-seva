@@ -44,6 +44,7 @@ public class GlobalExceptionHandler {
         ErrorResponse resp = new ErrorResponse();
         resp.setSuccess(false);
         resp.setMessage("Account cannot be created");
+        resp.setCode("EMAIL_ALREADY_EXISTS");
 
         Map<String, String> errors = new HashMap<>();
         errors.put("email",ex.getMessage());
