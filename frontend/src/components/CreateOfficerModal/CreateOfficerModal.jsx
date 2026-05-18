@@ -2,23 +2,13 @@ import React, { useState } from "react";
 import styles from "./createOfficerModal.module.css";
 import { toast } from "react-toastify";
 
-const CreateOfficerModal = ({ isOpen, onClose}) => {
+const CreateOfficerModal = ({ isOpen, onClose, invokeRefreshOfficer, setLoading, setLoaderText}) => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("OFFICER");
   const [department, setDepartment] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const departments = [
-    "SANITATION",
-    "WATER",
-    "ELECTRICITY",
-    "ROADS",
-    "DRAINAGE",
-    "OTHER",
-  ];
 
   if (!isOpen) return null;
 
@@ -26,7 +16,9 @@ const CreateOfficerModal = ({ isOpen, onClose}) => {
     e.preventDefault();
     if (!fullName || !email || !password || !role || !department) return;
 
-    setLoading(true);
+    setLoaderText("Creating officer...")
+
+    const loaderId = setTimeout(() => setLoading(true),300);
     try {
       const response = await fetch("http://localhost:8080/admin/user", {
         method : "POST",
@@ -57,6 +49,8 @@ const CreateOfficerModal = ({ isOpen, onClose}) => {
       if (data.success) 
         toast.success(data.message)
 
+      invokeRefreshOfficer();
+
       setFullName("");
       setEmail("");
       setPassword("");
@@ -68,6 +62,7 @@ const CreateOfficerModal = ({ isOpen, onClose}) => {
       console.log("error side")
       console.log(error)
     } finally {
+      clearTimeout(loaderId)
       setLoading(false);
     }
   };

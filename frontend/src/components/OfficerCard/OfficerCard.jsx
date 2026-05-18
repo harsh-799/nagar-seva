@@ -5,6 +5,8 @@ import styles from './OfficerCard.module.css'
 
 const OfficerCard = (props) => {
 
+    // console.log(props.id)
+
   return (
    <div className={styles.officer_card}>
             <div className={styles.card_header}>
@@ -17,7 +19,13 @@ const OfficerCard = (props) => {
                 </div>
             </div>
 
-            <OfficerStats activeComplaints={props.activeComplaints} resolvedComplaints={props.resolvedComplaints} pendingComplaints={props.pendingComplaints}/>
+            <OfficerStats 
+            activeComplaints=
+            {props.activeComplaints == null ? 'N/A' : props.activeComplaints} 
+            resolvedComplaints=
+            {props.resolvedComplaints == null ? 'N/A' : props.resolvedComplaints} 
+            pendingComplaints=
+            {props.pendingComplaints == null ? 'N/A' : props.pendingComplaints}/>
 
             <hr className={styles.card_divider} />
             

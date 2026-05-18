@@ -22,14 +22,14 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [loaderText, setLoaderText] = useState("")
   const [selectedFilters, setSelectedFilters] = useState({
-    status : "",
-    ward : ""
+    status: "",
+    ward: "",
+    department: ""
   })
+  const [refreshOfficer, setRefreshOfficer] = useState(false)
 
   const navigate = useNavigate();
-   const scrollRef = useRef(null);
-
-
+  const scrollRef = useRef(null);
 
   const sidebarItems = [
     {
@@ -82,6 +82,7 @@ const AdminDashboard = () => {
         {
           filterBy: "department",
           values: [
+            "",
             "SANITATION",
             "WATER",
             "ELECTRICITY",
@@ -170,6 +171,18 @@ const AdminDashboard = () => {
             navigate("/change-password");
             return;
           }
+
+          const authErrors = [
+            "TOKEN_EXPIRED",
+            "SIGNATURE_FAILED",
+            "INVALID_TOKEN"
+          ];
+
+          if (authErrors.includes(errorData.code)) {
+            navigate("/login");
+            toast.warning("Session Expired, Kindly Login again")
+            return;
+          }
         }
 
         const data = await response.json();
@@ -217,14 +230,21 @@ const AdminDashboard = () => {
         />
 
         <div className={style.content_area} ref={scrollRef}>
-          {activeSection === "Complaints" 
-          && <Complaint 
-          scrollRef={scrollRef} 
-          filtered={selectedFilters} 
-          setLoading={setIsLoading}
-          setLoaderText={setLoaderText}
-          />}
-          {activeSection === "Officer Management" && <OfficerManagement />}
+          {activeSection === "Complaints"
+            && <Complaint
+              scrollRef={scrollRef}
+              filtered={selectedFilters}
+              setLoading={setIsLoading}
+              setLoaderText={setLoaderText}
+            />}
+          {activeSection === "Officer Management"
+            && <OfficerManagement
+              refreshOfficer={setRefreshOfficer}
+              filtered={selectedFilters}
+              scrollRef={scrollRef}
+              setLoading={setIsLoading}
+              setLoaderText={setLoaderText}
+            />}
           {activeSection === "Ward Management" && <WardManagement />}
         </div>
       </main>
@@ -232,11 +252,15 @@ const AdminDashboard = () => {
       <CreateWardModal
         isOpen={isCreateWardModalOpen}
         onClose={() => setIsCreateWardModalOpen(false)}
+
       />
 
       <CreateOfficerModal
         isOpen={isCreateOfficerModalOpen}
         onClose={() => setIsCreateOfficerModalOpen(false)}
+        invokeRefreshOfficer={(prev) => setRefreshOfficer(!prev)}
+        setLoading={setIsLoading}
+        setLoaderText={setLoaderText}
       />
     </div>
   );

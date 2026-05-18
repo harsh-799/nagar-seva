@@ -107,11 +107,11 @@ const Complaint = ({ scrollRef, filtered, setLoading, setLoaderText}) => {
     };
   }, []);
 
-  useEffect(() => {
-    setComplaints([]);
-    setPage(0);
-    isLast.current = false;
-  }, [filtered]);
+ useEffect(() => {
+   setComplaints([]);
+   setPage(0);
+   isLast.current = false;
+}, [filtered]);
 
   return (
     <div className={styles.complaints_wrapper}>
