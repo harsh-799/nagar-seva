@@ -85,7 +85,7 @@ const UpdatePassword = () => {
 
   return (
     <div className={styles.auth_page_body}>
-      {loading && <Loader />}
+      {loading && <Loader text="Updating Password..." />}
       <div className={styles.auth_container}>
         <div className={styles.auth_card}>
           <div className={styles.auth_header}>

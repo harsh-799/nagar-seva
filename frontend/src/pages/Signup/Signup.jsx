@@ -100,7 +100,7 @@ const Signup = () => {
 
   return (
     <div className={styles.auth_page_body}>
-      {loading && <Loader />}
+      {loading && <Loader text="Creating Account..." />}
       <div className={styles.auth_container}>
         <div className={styles.auth_card}>
           <div className={styles.auth_header}>
