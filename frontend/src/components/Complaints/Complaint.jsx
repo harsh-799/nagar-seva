@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import ComplaintCard from "../ComplaintCard/ComplaintCard";
 import styles from "./complaint.module.css";
 
-const Complaint = ({ scrollRef, filtered }) => {
+const Complaint = ({ scrollRef, filtered, setLoading, setLoaderText}) => {
   const [pageInfo, setPageInfo] = useState({});
   const [complaints, setComplaints] = useState([]);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(6);
-  
+
   const loadingRef = useRef(false);
   const isLast = useRef(false);
 
@@ -53,6 +53,12 @@ const Complaint = ({ scrollRef, filtered }) => {
 
   const fetchComplaint = async () => {
 
+    setLoaderText("Loading complaints...")
+
+    const loaderId = setTimeout(() => {
+        setLoading(true)
+      },300)
+
     let url = `http://localhost:8080/admin/complaints?page=${page}&size=${size}`;
     if (filtered.status != "") {
       url += `&status=${filtered.status}`;
@@ -78,10 +84,14 @@ const Complaint = ({ scrollRef, filtered }) => {
       const newData = data.complaints;
       setComplaints((prev) => [...prev, ...newData]);
       isLast.current = data.isLast;
+
+      
     } catch (err) {
       console.log(err);
     } finally {
       loadingRef.current = false;
+      clearInterval(loaderId)
+      // setLoading(false)
     }
   };
 

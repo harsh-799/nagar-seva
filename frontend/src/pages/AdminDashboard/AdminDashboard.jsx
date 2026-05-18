@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import CreateWardModal from "../../components/CreateWardModal/CreateWardModal";
 import CreateOfficerModal from "../../components/CreateOfficerModal/CreateOfficerModal";
 import { toast } from "react-toastify";
+import Loader from '../../components/Loader/Loader';
 
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,6 +19,8 @@ const AdminDashboard = () => {
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
   const [isCreateWardModalOpen, setIsCreateWardModalOpen] = useState(false);
   const [isCreateOfficerModalOpen, setIsCreateOfficerModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
+  const [loaderText, setLoaderText] = useState("")
   const [selectedFilters, setSelectedFilters] = useState({
     status : "",
     ward : ""
@@ -180,6 +183,7 @@ const AdminDashboard = () => {
 
   return (
     <div className={style.app_container}>
+      {isLoading && <Loader text={loaderText} />}
       <div
         className={`${style.sidebar_overlay} ${isSidebarOpen ? style.active : ""}`}
         onClick={() => setIsSidebarOpen(false)}
@@ -213,7 +217,13 @@ const AdminDashboard = () => {
         />
 
         <div className={style.content_area} ref={scrollRef}>
-          {activeSection === "Complaints" && <Complaint scrollRef={scrollRef} filtered={selectedFilters}/>}
+          {activeSection === "Complaints" 
+          && <Complaint 
+          scrollRef={scrollRef} 
+          filtered={selectedFilters} 
+          setLoading={setIsLoading}
+          setLoaderText={setLoaderText}
+          />}
           {activeSection === "Officer Management" && <OfficerManagement />}
           {activeSection === "Ward Management" && <WardManagement />}
         </div>
