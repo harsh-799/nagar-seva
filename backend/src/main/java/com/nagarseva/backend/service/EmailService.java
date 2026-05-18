@@ -8,6 +8,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -28,6 +29,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
+    @Value("${mail.username}") String senderEmail;
     @Async
     public void sendRegistrationSuccessEmail(String name, String email) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -35,6 +37,7 @@ public class EmailService {
 
         try {
             helper.setTo(email);
+            helper.setFrom(senderEmail);
             helper.setSubject("✅ Welcome to Nagarseva – Registration Successful!");
 
             ClassPathResource resource = new ClassPathResource("templates/register.html");
@@ -48,7 +51,6 @@ public class EmailService {
 
             helper.setText(htmlContent, true);
             javaMailSender.send(mimeMessage);
-            System.out.println("done");
         } catch (MessagingException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -63,6 +65,7 @@ public class EmailService {
 
         try {
             helper.setTo(email);
+            helper.setFrom(senderEmail);
             helper.setSubject("✅ Your Complaint Has Been Approved – Nagarseva");
 
             ClassPathResource resource = new ClassPathResource("templates/approved.html");
@@ -95,6 +98,7 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("❌ Your Complaint Has Been Rejected – Nagarseva");
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/rejected.html");
 
@@ -125,6 +129,7 @@ public class EmailService {
 
         try {
             helper.setTo(email);
+            helper.setFrom(senderEmail);
             helper.setSubject("✅ Complaint Work Completed • Verification Pending – NagarSeva");
 
             ClassPathResource resource = new ClassPathResource("templates/pendingverification.html");
@@ -157,6 +162,7 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("⏳ Complaint Automatically Closed – NagarSeva");
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/autoclosed.html");
 
@@ -188,6 +194,7 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("🔄 Complaint Reopened for Further Action – NagarSeva");
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/reopened.html");
 
@@ -219,6 +226,8 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("🔐 Password Reset Verification Code – NagarSeva");
+            helper.setFrom(senderEmail);
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/forgotpassword.html");
 
@@ -246,6 +255,7 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("✅ Your Password Has Been Changed – NagarSeva\"");
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/passwordchanged.html");
 
@@ -278,6 +288,7 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("✅ Welcome to NagarSeva – Your Account Is Ready");
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/registerbyadmin.html");
 
@@ -314,6 +325,7 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("📌 New Complaint Assigned To You – NagarSeva");
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/assigned.html");
 
@@ -352,6 +364,7 @@ public class EmailService {
         try {
             helper.setTo(email);
             helper.setSubject("⚠️ Complaint Priority Updated – NagarSeva");
+            helper.setFrom(senderEmail);
 
             ClassPathResource resource = new ClassPathResource("templates/priority.html");
 
