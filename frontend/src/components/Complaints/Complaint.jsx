@@ -1,82 +1,116 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ComplaintCard from "../ComplaintCard/ComplaintCard";
 import styles from "./complaint.module.css";
 
-const Complaint = () => {
+const Complaint = ({ scrollRef, filtered }) => {
   const [pageInfo, setPageInfo] = useState({});
   const [complaints, setComplaints] = useState([]);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(6);
-  const [status, setStatus] = useState("");
+  
+  const loadingRef = useRef(false);
+  const isLast = useRef(false);
 
   const handleViewDetails = async (complaintId) => {
     try {
-        const response = await fetch(`http://localhost:8080/admin/complaint/${complaintId}`,
+      const response = await fetch(
+        `http://localhost:8080/admin/complaint/${complaintId}`,
         {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`
-            },
-        }
-    )
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
 
-    if (!response.ok) {
-        console.log("gadbad")
-    }
+      if (!response.ok) {
+        console.log("gadbad");
+      }
 
-    const data = await response.json()
+      const data = await response.json();
 
-    console.log(data)
+      console.log(data);
     } catch (err) {
-        console.log(err)
+      console.log(err);
     }
-  }
+  };
 
+  const handleScroll = () => {
+    const currentScrollPosition = scrollRef.current.scrollTop;
+    const screenVisibleHeight = scrollRef.current.clientHeight;
+    const totalPageHeight = scrollRef.current.scrollHeight;
+
+    if (
+      currentScrollPosition + screenVisibleHeight >= totalPageHeight - 200 &&
+      !loadingRef.current &&
+      !isLast.current
+    ) {
+      loadingRef.current = true;
+      setPage((page) => page + 1);
+    }
+  };
+
+  const fetchComplaint = async () => {
+
+    let url = `http://localhost:8080/admin/complaints?page=${page}&size=${size}`;
+    if (filtered.status != "") {
+      url += `&status=${filtered.status}`;
+    }
+    if (filtered.ward != "") {
+      url += `&wardId=${filtered.ward}`;
+    }
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.log("error");
+        return;
+      }
+
+      const data = await response.json();
+      const newData = data.complaints;
+      setComplaints((prev) => [...prev, ...newData]);
+      isLast.current = data.isLast;
+    } catch (err) {
+      console.log(err);
+    } finally {
+      loadingRef.current = false;
+    }
+  };
 
   useEffect(() => {
-    const fetchComplaint = async () => {
-      try {
-        const response = await fetch(
-        //   `http://localhost:8080/admin/complaints?${page}&${size}&${status}&${ward}`,
-          `http://localhost:8080/admin/complaints`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`
-            },
-          },
-        );
+    fetchComplaint();
+  }, [filtered, page]);
 
-        if (!response.ok) {
-          console.log("error");
-          return;
-        }
+  useEffect(() => {
+    scrollRef.current.addEventListener("scroll", handleScroll);
 
-        const data = await response.json();
-
-        console.log(data.complaints)
-
-        setPageInfo(pageInfo)
-        setComplaints(data.complaints)
-        console.log(data.complaints)
-      } catch (err) {
-        console.log(err);
-      }
+    return () => {
+      scrollRef.current.removeEventListener("scroll", handleScroll);
     };
+  }, []);
 
-    fetchComplaint()
-  },[]);
+  useEffect(() => {
+    setComplaints([]);
+    setPage(0);
+    isLast.current = false;
+  }, [filtered]);
 
   return (
     <div className={styles.complaints_wrapper}>
       <div className={styles.complaints_grid}>
-        {complaints.map((complaint, index) => (
+        {complaints.map((complaint) => (
           <ComplaintCard
             key={complaint.complaintId}
             id={complaint.complaintId}
-            date={complaint.createdAt.substring(0,10)}
+            date={complaint.createdAt.substring(0, 10)}
             title={complaint.title}
             category={complaint.issueType}
             ward={complaint.wardId}

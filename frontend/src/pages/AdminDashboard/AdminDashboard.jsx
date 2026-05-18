@@ -1,4 +1,4 @@
-import React, { act, useEffect, useState } from "react";
+import React, { act, useEffect, useRef, useState } from "react";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
 import Complaint from "../../components/Complaints/Complaint";
@@ -18,8 +18,15 @@ const AdminDashboard = () => {
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
   const [isCreateWardModalOpen, setIsCreateWardModalOpen] = useState(false);
   const [isCreateOfficerModalOpen, setIsCreateOfficerModalOpen] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState({
+    status : "",
+    ward : ""
+  })
 
   const navigate = useNavigate();
+   const scrollRef = useRef(null);
+
+
 
   const sidebarItems = [
     {
@@ -89,7 +96,7 @@ const AdminDashboard = () => {
         {
           filterBy: "status",
           values: [
-            "ALL",
+            "",
             "CREATED",
             "APPROVED",
             "ASSIGNED",
@@ -105,8 +112,8 @@ const AdminDashboard = () => {
           filterBy: "ward",
           values: [
             {
-              wardId: "ALL",
-              wardName: "ALL WARDS",
+              wardId: "",
+              wardName: "",
             },
             ...ward,
           ],
@@ -195,6 +202,7 @@ const AdminDashboard = () => {
           heading={activeToolbar.heading}
           placeholder={activeToolbar.placeholder}
           filters={activeToolbar.filters}
+          selectedFilters={setSelectedFilters}
           buttonPlaceholder={activeToolbar.buttonPlaceholder}
           onCreateClick={() => {
             if (activeSection === "Ward Management")
@@ -204,8 +212,8 @@ const AdminDashboard = () => {
           }}
         />
 
-        <div className={style.content_area}>
-          {activeSection === "Complaints" && <Complaint />}
+        <div className={style.content_area} ref={scrollRef}>
+          {activeSection === "Complaints" && <Complaint scrollRef={scrollRef} filtered={selectedFilters}/>}
           {activeSection === "Officer Management" && <OfficerManagement />}
           {activeSection === "Ward Management" && <WardManagement />}
         </div>
