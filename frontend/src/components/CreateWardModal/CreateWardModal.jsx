@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './createWardModal.module.css';
 import { toast } from "react-toastify";
 
-const CreateWardModal = ({ isOpen, onClose, onSubmit }) => {
+const CreateWardModal = ({ isOpen, onClose, invokeRefreshWard, fetchWard }) => {
   const [wardId, setWardId] = useState('');
   const [wardName, setWardName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,8 +15,6 @@ const CreateWardModal = ({ isOpen, onClose, onSubmit }) => {
 
     setLoading(true);
     try {
-
-      console.log(localStorage.getItem("token"))
 
       const response = await fetch("http://localhost:8080/admin/ward", {
           method: "POST",
@@ -33,7 +31,15 @@ const CreateWardModal = ({ isOpen, onClose, onSubmit }) => {
         if (!response.ok) {
           const errorData = await response.json();
 
-          console.log(errorData)
+          if (response.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
+        }
+
+        if (response.status === 409) {
+          toast.error("Ward already exists");
+        }
           return;
         }
 
@@ -41,9 +47,13 @@ const CreateWardModal = ({ isOpen, onClose, onSubmit }) => {
 
         toast.success(data.message)
 
-      // Reset form after successful submission
-      setWardId('');
-      setWardName('');
+        
+        // Reset form after successful submission
+        setWardId('');
+        setWardName('');
+        
+        await fetchWard();
+        invokeRefreshWard();
       onClose();
     } catch (error) {
       console.log(error)

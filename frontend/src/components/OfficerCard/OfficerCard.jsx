@@ -5,8 +5,6 @@ import styles from './OfficerCard.module.css'
 
 const OfficerCard = (props) => {
 
-    // console.log(props.id)
-
   return (
    <div className={styles.officer_card}>
             <div className={styles.card_header}>

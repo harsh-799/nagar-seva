@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import WardCard from './WardCard';
 import style from './wardManagement.module.css';
 
-const WardManagement = () => {
+const WardManagement = ({refreshWard}) => {
     const [wardData, setWardData] = useState([])
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const WardManagement = () => {
             }
         }
         fetchWardData();
-    },[])
+    },[refreshWard])
   return (
     <>
       <div className={style.ward_grid}>

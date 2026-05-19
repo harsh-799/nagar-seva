@@ -1,24 +1,18 @@
 import React from "react";
 import styles from "./headerToolbar.module.css";
 
-const HeaderToolbar = ({
-  heading,
-  placeholder,
-  buttonPlaceholder,
-  filters,
-  onCreateClick,
-  selectedFilters,
-}) => {
-  if (heading === "Dashboard" || heading === "Logout") {
-    return null;
-  }
+const HeaderToolbar = ({ heading, placeholder, buttonPlaceholder, filters, onCreateClick, selectedFilters}) => {
 
-  const handleFilterChange = (filterBy, value) => {
-    selectedFilters((prev) => ({
-      ...prev,
-      [filterBy]: value,
-    }));
-  };
+    if (heading === "Dashboard" || heading === "Logout") {
+        return null;
+    }
+
+    const handleFilterChange = (filterBy, value) => {
+      selectedFilters(prev => ({
+        ...prev,
+        [filterBy] : value
+      }))
+    }
 
   return (
     <div className={styles.action_row}>
@@ -28,40 +22,58 @@ const HeaderToolbar = ({
       </div>
 
       {filters.map((filter, idx) => (
-        <select
-          key={idx}
-          className={styles.filter_dropdown}
-          onChange={(e) => handleFilterChange(filter.filterBy, e.target.value)}
+  <select
+    key={idx}
+    className={styles.filter_dropdown}
+    onChange={(e) =>
+      handleFilterChange(filter.filterBy, e.target.value)
+    }
+  >
+    {filter.values.map((value, valueIdx) => {
+
+      const isWardFilter = filter.filterBy === "ward";
+
+      const optionValue = isWardFilter
+        ? value.wardId
+        : value;
+
+      const optionLabel = isWardFilter
+        ? value.wardId === ""
+          ? "All Wards"
+          : `Ward ${value.wardId}`
+        : value === ""
+          ? "ALL"
+          : value;
+
+      return (
+        <option
+          key={valueIdx}
+          value={optionValue}
         >
-          {filter.values.map((value, valueIdx) => {
-            const isWardFilter = filter.filterBy === "ward";
+          {optionLabel}
+        </option>
+      );
+    })}
+  </select>
+))}
+      
 
-            const optionValue = isWardFilter ? value.wardId : value;
+      {/* {(heading === "Officer Management" || heading === "Ward Management" || heading === "My Complaints") && 
+      buttonPlaceholder.map((btn,idx)=> {
+        <button key={idx}className={styles.btn_create_officer} onClick={onCreateClick}>
+        <i className="ph ph-plus-circle"></i> Create {btn.buttonPlaceholder}
+      </button>
+      })
+      } */}
 
-            const optionLabel = isWardFilter
-              ? value.wardId === ""
-                ? "All Wards"
-                : `Ward ${value.wardId}`
-              : value === ""
-                ? "ALL"
-                : value;
 
-            return (
-              <option key={valueIdx} value={optionValue}>
-                {optionLabel}
-              </option>
-            );
-          })}
-        </select>
-      ))}
-
-      {(heading === "Officer Management" ||
-        heading === "Ward Management" ||
-        heading === "My Complaints") && (
-        <button className={styles.btn_create_officer} onClick={onCreateClick}>
-          <i className="ph ph-plus-circle"></i> Create {buttonPlaceholder}
-        </button>
-      )}
+        
+          <div className={styles.button_group}>
+            {buttonPlaceholder?.map((btn,idx) => (
+          <button key={idx} className={styles.btn_create_officer} onClick={() => onCreateClick(btn)}>
+            <i className="ph ph-plus-circle"></i> Create {btn}</button>
+        ))}
+      </div>
     </div>
   );
 };

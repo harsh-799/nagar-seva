@@ -9,6 +9,8 @@ const OfficerManagement = ({refreshOfficer, filtered, scrollRef, setLoading, set
   const isLast = useRef(false);
   const loadingRef = useRef(false);
 
+  console.log(filtered)
+
   const handleScroll = () => {
     const currentScrollPosition = scrollRef.current.scrollTop;
     const screenVisibleHeight = scrollRef.current.clientHeight;

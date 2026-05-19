@@ -11,6 +11,7 @@ import CreateWardModal from "../../components/CreateWardModal/CreateWardModal";
 import CreateOfficerModal from "../../components/CreateOfficerModal/CreateOfficerModal";
 import { toast } from "react-toastify";
 import Loader from '../../components/Loader/Loader';
+import CreateCouncillorModal from "../../components/CreateCouncillorModal/CreateCouncillorModal";
 
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -19,6 +20,7 @@ const AdminDashboard = () => {
   const [matchedToolbar, setMatchedToolbar] = useState(activeSection);
   const [isCreateWardModalOpen, setIsCreateWardModalOpen] = useState(false);
   const [isCreateOfficerModalOpen, setIsCreateOfficerModalOpen] = useState(false);
+  const [isCreateCouncillorModalOpen, setIsCreateCouncillorModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false)
   const [loaderText, setLoaderText] = useState("")
   const [selectedFilters, setSelectedFilters] = useState({
@@ -26,7 +28,9 @@ const AdminDashboard = () => {
     ward: "",
     department: ""
   })
+  const [refreshWard, setRefreshWard] = useState(false)
   const [refreshOfficer, setRefreshOfficer] = useState(false)
+  const [refreshCouncillor, setRefreshCouncillor] = useState(false)
 
   const navigate = useNavigate();
   const scrollRef = useRef(null);
@@ -72,12 +76,14 @@ const AdminDashboard = () => {
     {
       heading: "Dashboard",
       placeholder: "",
+      buttonPlaceholder: null,
       filters: [],
     },
     {
       heading: "Officer Management",
       placeholder: "Search officers...",
-      buttonPlaceholder: "Officer",
+      buttonPlaceholder: ["Officer"
+      ],
       filters: [
         {
           filterBy: "department",
@@ -96,6 +102,7 @@ const AdminDashboard = () => {
     {
       heading: "Complaints",
       placeholder: "Search complaints....",
+      buttonPlaceholder: null,
       filters: [
         {
           filterBy: "status",
@@ -127,7 +134,7 @@ const AdminDashboard = () => {
     {
       heading: "Ward Management",
       placeholder: "Search wards....",
-      buttonPlaceholder: "Ward",
+      buttonPlaceholder: ["councillor", "ward"],
       filters: [
         {
           filterBy: "ward",
@@ -144,6 +151,7 @@ const AdminDashboard = () => {
     {
       heading: "Logout",
       placeholder: "",
+      buttonPlaceholder: null,
       filters: [],
     },
   ];
@@ -152,8 +160,7 @@ const AdminDashboard = () => {
     (item) => item.heading === activeSection,
   );
 
-  useEffect(() => {
-    const fetchWard = async () => {
+  const fetchWard = async () => {
       // console.log("hi")
       try {
         const response = await fetch("http://localhost:8080/admin/wards", {
@@ -179,6 +186,7 @@ const AdminDashboard = () => {
           ];
 
           if (authErrors.includes(errorData.code)) {
+            // console.log("hii")
             navigate("/login");
             toast.warning("Session Expired, Kindly Login again")
             return;
@@ -191,6 +199,8 @@ const AdminDashboard = () => {
         console.log(err);
       }
     };
+
+  useEffect(() => {
     fetchWard();
   }, []);
 
@@ -221,11 +231,18 @@ const AdminDashboard = () => {
           filters={activeToolbar.filters}
           selectedFilters={setSelectedFilters}
           buttonPlaceholder={activeToolbar.buttonPlaceholder}
-          onCreateClick={() => {
-            if (activeSection === "Ward Management")
+          onCreateClick={(btn) => {
+            if (btn === "ward") {
               setIsCreateWardModalOpen(true);
-            if (activeSection === "Officer Management")
+            }
+
+            if (btn === "councillor") {
+              setIsCreateCouncillorModalOpen(true)
+            }
+
+            if (btn === "Officer") {
               setIsCreateOfficerModalOpen(true);
+            }
           }}
         />
 
@@ -245,15 +262,16 @@ const AdminDashboard = () => {
               setLoading={setIsLoading}
               setLoaderText={setLoaderText}
             />}
-          {activeSection === "Ward Management" && <WardManagement />}
+          {activeSection === "Ward Management" && <WardManagement refreshWard={refreshWard}/>}
         </div>
       </main>
 
       <CreateWardModal
         isOpen={isCreateWardModalOpen}
         onClose={() => setIsCreateWardModalOpen(false)}
-
-      />
+        invokeRefreshWard={(prev) => setRefreshWard(!prev)}
+        fetchWard={fetchWard}
+        />
 
       <CreateOfficerModal
         isOpen={isCreateOfficerModalOpen}
@@ -261,6 +279,12 @@ const AdminDashboard = () => {
         invokeRefreshOfficer={(prev) => setRefreshOfficer(!prev)}
         setLoading={setIsLoading}
         setLoaderText={setLoaderText}
+      />
+
+      <CreateCouncillorModal
+      isOpen={isCreateCouncillorModalOpen}
+      onClose={() => setIsCreateCouncillorModalOpen(false)}
+      invokeRefreshCouncillor={(prev) => setRefreshCouncillor(!prev)}
       />
     </div>
   );

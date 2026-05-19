@@ -79,6 +79,12 @@
   margin-left: auto;
 }
 
+.button_group {
+   margin-left: auto;
+   display: flex;
+   gap: 16px;
+}
+
 .btn_create_officer:hover {
   background-color: #1f2937;
   transform: translateY(-2px);

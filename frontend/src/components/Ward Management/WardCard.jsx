@@ -29,6 +29,9 @@ const WardCard = ({ wardId, wardName, wardCouncillor }) => {
       <hr className={styles.card_divider} />
 
       <div className={styles.card_footer}>
+        <button className={styles.btn_assign}>
+          Assign Councillor <i className="ph ph-arrow-right"></i>
+        </button>
         <button className={styles.btn_view}>
           View Details <i className="ph ph-arrow-right"></i>
         </button>
