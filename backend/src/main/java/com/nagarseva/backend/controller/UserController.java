@@ -43,4 +43,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
+    @GetMapping("/admin/councillors")
+    public ResponseEntity<CouncillorFetchResponse> showAllCouncillors() {
+        CouncillorFetchResponse resp = userService.getAllCouncillor();
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
 }

@@ -205,4 +205,28 @@ public class UserService {
 
         return officerFetchResponse;
     }
+
+    public CouncillorFetchResponse getAllCouncillor() {
+        User admin = fetchAuthenticatedUser();
+        validateAdmin(admin);
+
+        List<User> wardCouncillorsList = userRepository.findAllByRole(Role.COUNCILLOR);
+
+        if (wardCouncillorsList.isEmpty()) {
+            throw new UserNotFoundException("No ward councillor exists!");
+        }
+
+        List<CouncillorFetchData> councillorFetchData =  new ArrayList<>();
+
+        for (User councillor: wardCouncillorsList) {
+            councillorFetchData.add(new CouncillorFetchData(councillor.getId(), councillor.getFullName()));
+        }
+
+        CouncillorFetchResponse response = new CouncillorFetchResponse();
+        response.setSuccess(true);
+        response.setMessage("Councillor fetched successfully");
+        response.setCouncillorList(councillorFetchData);
+
+        return response;
+    }
 }

@@ -31,4 +31,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             @Param("role") Role role,
             Pageable pageable
     );
+
+    List<User> findAllByRole(Role role);
 }
