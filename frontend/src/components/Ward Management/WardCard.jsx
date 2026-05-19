@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './WardCard.module.css';
 
-const WardCard = ({ wardId, wardName, wardCouncillor, handleAssignCouncillor }) => {
+const WardCard = ({ wardId, wardName, wardCouncillor, handleAssignCouncillor, handleEditWard}) => {
   return (
     <div className={styles.ward_card}>
       <div className={styles.card_header}>
@@ -30,10 +30,10 @@ const WardCard = ({ wardId, wardName, wardCouncillor, handleAssignCouncillor }) 
 
       <div className={styles.card_footer}>
         <button className={styles.btn_assign} onClick={() => handleAssignCouncillor(wardId, wardName)}>
-          Assign Councillor <i className="ph ph-arrow-right"></i>
+          {wardCouncillor? "Reassign Councillor" : "Assign councillor"} <i className="ph ph-arrow-right"></i>
         </button>
-        <button className={styles.btn_view}>
-          View Details <i className="ph ph-arrow-right"></i>
+        <button className={styles.btn_view} onClick={() => handleEditWard(wardId, wardName)}>
+          Edit Ward <i className="ph ph-arrow-right"></i>
         </button>
       </div>
     </div>

@@ -10,4 +10,5 @@ import lombok.Setter;
 public class WardResponse {
     private Integer wardId;
     private String wardName;
+    private String councillorName;
 }

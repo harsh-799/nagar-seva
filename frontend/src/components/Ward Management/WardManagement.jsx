@@ -3,23 +3,28 @@ import WardCard from './WardCard';
 import style from './wardManagement.module.css';
 import { toast } from 'react-toastify';
 import AssignCouncillorModal from '../AssignCouncillorModal/AssignCouncillorModal';
+import UpdateWardModal from '../UpdateWardModal/UpdateWardModal';
 
-const WardManagement = ({ refreshWard, setLoading, setLoaderText }) => {
+const WardManagement = ({ invokeRefreshWard, setLoading, setLoaderText }) => {
   const [wardData, setWardData] = useState([])
   const [selectedWard, setSelectedWard] = useState({
-    wardName : "",
-    wardId : ""
+    wardName: "",
+    wardId: ""
   });
   const [isAssignCouncillorModalOpen, setIsAssignCouncillorModalOpen] = useState(false);
   const [councillors, setCouncillors] = useState([])
-  // const [isAssignCouncillorModalOpen]
-
-  // console.log(councillor)
+  const [isUpdateWardModalOpen, setIsUpdateWardModalOpen] = useState(false)
 
   const handleAssignCouncillor = (wardId, wardName) => {
     // console.log(ward)
-    setSelectedWard({wardId : wardId, wardName : wardName});
+    setSelectedWard({ wardId: wardId, wardName: wardName });
     setIsAssignCouncillorModalOpen(true)
+  }
+
+  const handleEditWard = (wardId, wardName) => {
+    // console.log(ward)
+    setSelectedWard({ wardId: wardId, wardName: wardName });
+    setIsUpdateWardModalOpen(true)
   }
 
   const fetchWardData = async () => {
@@ -45,7 +50,7 @@ const WardManagement = ({ refreshWard, setLoading, setLoaderText }) => {
       }
 
       const data = await response.json();
-      setWardData(data)
+      setWardData(data.wards)
     } catch (err) {
       console.log(err)
       toast.error("Something went wrong.")
@@ -85,7 +90,7 @@ const WardManagement = ({ refreshWard, setLoading, setLoaderText }) => {
   useEffect(() => {
     fetchWardData();
     fetchWardCouncillors();
-  }, [refreshWard])
+  }, [invokeRefreshWard])
   return (
     <>
       <div className={style.ward_grid}>
@@ -96,18 +101,29 @@ const WardManagement = ({ refreshWard, setLoading, setLoaderText }) => {
             wardName={ward.wardName}
             wardCouncillor={ward.wardCouncillor}
             handleAssignCouncillor={handleAssignCouncillor}
+            handleEditWard={handleEditWard}
           />
         ))}
       </div>
 
-      
+
       <AssignCouncillorModal
         isOpen={isAssignCouncillorModalOpen}
         onClose={() => setIsAssignCouncillorModalOpen(false)}
         ward={selectedWard}
         councillors={councillors}
+        setLoading={setLoading}
+        setLoaderText={setLoaderText}
+        invokeRefreshWard={invokeRefreshWard}
       />
-      
+
+      <UpdateWardModal 
+      isOpen={isUpdateWardModalOpen}
+      onClose={() => setIsUpdateWardModalOpen(false)}
+      selectedWard={selectedWard}
+      invokeRefreshWard={invokeRefreshWard}
+      />
+
     </>
   )
 }

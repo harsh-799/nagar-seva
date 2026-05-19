@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import styles from "./assignCouncillorModal.module.css";
+import { toast } from "react-toastify";
 
 const AssignCouncillorModal = ({
   isOpen,
   onClose,
   ward,
   councillors,
+  invokeRefreshWard,
+  setLoading,
+   setLoaderText 
 }) => {
 
   const [selectedCouncillor, setSelectedCouncillor] = useState("");
-  const [loading, setLoading] = useState(false);
-
-//   console.log("inside",councillors)
 
   if (!isOpen) return null;
 
@@ -20,27 +21,49 @@ const AssignCouncillorModal = ({
 
     if (!selectedCouncillor) return;
 
+    setLoaderText("Assigning councillor...")
+    const loaderId = setTimeout(() => setLoading(true),300)
+
     try {
-      setLoading(true);
+        const response = await fetch(`http://localhost:8080/admin/ward/${ward.wardId}/assign-wc?councillorId=${selectedCouncillor}`,{
+            method : "PUT",
+            headers : {
+                "Content-Type" : "Application/json",
+                Authorization : `Bearer ${localStorage.getItem("token")}`
+            },
+            body: JSON.stringify({
+                id : ward.wardId,
+                councillorId : selectedCouncillor
+            })
+        })
 
-      console.log({
-        wardId: ward.wardId,
-        councillorId: selectedCouncillor,
-      });
 
-      // API CALL HERE
+        if (!response.ok) {
+            const errorData = await response.json();
 
-      onClose();
+            if (errorData.code === "COUNCILLOR_ALREADY_EXISTS") {
+                toast.error("Councillor is already registered with another ward");
+                return;
+            }
+        }
+
+        const data = await response.json();
+
+        invokeRefreshWard();
+        toast.success("councillor assigned successfully");
+        onClose();
 
     } catch (err) {
       console.log(err);
+      toast.error("something went wrong")
     } finally {
-      setLoading(false);
+      setLoading(false)
+      clearTimeout(loaderId)
     }
   };
 
   const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget && !loading) {
+    if (e.target === e.currentTarget) {
       onClose();
     }
   };
@@ -107,7 +130,7 @@ const AssignCouncillorModal = ({
               {councillors.map((councillor) => (
                 <option
                   key={councillor.councillorId}
-                  value={councillor.id}
+                  value={councillor.councillorId}
                 >
                   {councillor.name} (ID: {councillor.councillorId})
                 </option>
@@ -127,9 +150,8 @@ const AssignCouncillorModal = ({
             <button
               type="submit"
               className={styles.btn_primary}
-              disabled={!selectedCouncillor || loading}
-            >
-              {loading ? "Assigning..." : "Assign Councillor"}
+              disabled={!selectedCouncillor}
+            > Assign Councillor
             </button>
           </div>
 

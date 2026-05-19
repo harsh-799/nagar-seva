@@ -154,7 +154,6 @@ const AdminDashboard = () => {
   );
 
   const fetchWard = async () => {
-      // console.log("hi")
       try {
         const response = await fetch("http://localhost:8080/admin/wards", {
           method: "GET",
@@ -179,7 +178,6 @@ const AdminDashboard = () => {
           ];
 
           if (authErrors.includes(errorData.code)) {
-            // console.log("hii")
             navigate("/login");
             toast.warning("Session Expired, Kindly Login again")
             return;
@@ -187,7 +185,7 @@ const AdminDashboard = () => {
         }
 
         const data = await response.json();
-        setWard(data);
+        setWard(data.wards);
       } catch (err) {
         console.log(err);
       }
@@ -258,7 +256,7 @@ const AdminDashboard = () => {
           {activeSection === "Ward Management" 
           && 
           <WardManagement 
-          refreshWard={refreshWard}
+          invokeRefreshWard={(prev) => setRefreshWard(!prev)}
           setLoading={setIsLoading}
           setLoaderText={setLoaderText}
           />}
