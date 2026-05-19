@@ -38,13 +38,13 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 email = jwtService.getEmail(token);
             } catch (ExpiredJwtException e) {
-                sendError(response, "Token Expired");
+                sendError(response, "TOKEN_EXPIRED","Token Expired");
                 return;
             } catch (SignatureException e) {
-                sendError(response, "Signature Verification Failed");
+                sendError(response, "SIGNATURE_FAILED","Signature Verification Failed");
                 return;
             } catch (Exception e) {
-                sendError(response,"Invalid token");
+                sendError(response,"INVALID_TOKEN","Invalid token");
                 return;
             }
         }
@@ -65,7 +65,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 if (customUser.isDefaultPassword()) {
                     if (!path.equals("/change-password")) {
-                        sendError(response, "Kindly Update your password.");
+                        sendError(response, "PASSWORD_UPDATE_REQUIRED","Kindly Update your password.");
                         return;
                     }
                 }
@@ -77,17 +77,17 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void sendError(HttpServletResponse response, String message) throws IOException {
+    private void sendError(HttpServletResponse response, String code, String message) throws IOException {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         String body = """
         {
             "success": false,
-            "code": "PASSWORD_UPDATE_REQUIRED",
+            "code": "%s",
             "message": "%s"
         }
-        """.formatted(message);
+        """.formatted(code,message);
 
         response.getWriter().write(body);
     }
