@@ -12,6 +12,7 @@ import CreateOfficerModal from "../../components/CreateOfficerModal/CreateOffice
 import { toast } from "react-toastify";
 import Loader from '../../components/Loader/Loader';
 import CreateCouncillorModal from "../../components/CreateCouncillorModal/CreateCouncillorModal";
+import AssignCouncillorModal from "../../components/AssignCouncillorModal/AssignCouncillorModal";
 
 const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,6 +22,7 @@ const AdminDashboard = () => {
   const [isCreateWardModalOpen, setIsCreateWardModalOpen] = useState(false);
   const [isCreateOfficerModalOpen, setIsCreateOfficerModalOpen] = useState(false);
   const [isCreateCouncillorModalOpen, setIsCreateCouncillorModalOpen] = useState(false);
+  
   const [isLoading, setIsLoading] = useState(false)
   const [loaderText, setLoaderText] = useState("")
   const [selectedFilters, setSelectedFilters] = useState({
@@ -31,6 +33,8 @@ const AdminDashboard = () => {
   const [refreshWard, setRefreshWard] = useState(false)
   const [refreshOfficer, setRefreshOfficer] = useState(false)
   const [refreshCouncillor, setRefreshCouncillor] = useState(false)
+  
+  const [councillorWard, setCouncillorWard] = useState("")
 
   const navigate = useNavigate();
   const scrollRef = useRef(null);
@@ -135,18 +139,7 @@ const AdminDashboard = () => {
       heading: "Ward Management",
       placeholder: "Search wards....",
       buttonPlaceholder: ["councillor", "ward"],
-      filters: [
-        {
-          filterBy: "ward",
-          values: [
-            {
-              wardId: "ALL",
-              wardName: "ALL WARDS",
-            },
-            ...ward,
-          ],
-        },
-      ],
+      filters: [],
     },
     {
       heading: "Logout",
@@ -262,7 +255,13 @@ const AdminDashboard = () => {
               setLoading={setIsLoading}
               setLoaderText={setLoaderText}
             />}
-          {activeSection === "Ward Management" && <WardManagement refreshWard={refreshWard}/>}
+          {activeSection === "Ward Management" 
+          && 
+          <WardManagement 
+          refreshWard={refreshWard}
+          setLoading={setIsLoading}
+          setLoaderText={setLoaderText}
+          />}
         </div>
       </main>
 
@@ -285,7 +284,10 @@ const AdminDashboard = () => {
       isOpen={isCreateCouncillorModalOpen}
       onClose={() => setIsCreateCouncillorModalOpen(false)}
       invokeRefreshCouncillor={(prev) => setRefreshCouncillor(!prev)}
+      
       />
+
+     
     </div>
   );
 };

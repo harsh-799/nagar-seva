@@ -61,7 +61,7 @@
   color: #8c8c8c;
   font-size: 20px;
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
+  /* backdrop-filter: blur(12px); */
   overflow-y: auto;
 height: 100vh;
 }
